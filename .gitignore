@@ -1,0 +1,14 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Personal photo — add your own as assets/profile.jpg
+assets/profile.jpg
+
+# Editor directories
+.vscode/
+.idea/
