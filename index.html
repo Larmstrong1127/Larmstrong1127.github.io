@@ -727,8 +727,9 @@
             ownership — from design and AI architecture through final QA. I've also built and shipped
             <strong>DentaVision</strong> — a live, full-stack AI SaaS integrating Claude Vision to
             parse dental treatment plans into patient-facing visit schedules, drawing directly on my
-            experience as a Patient Care Coordinator. I've also delivered multiple ASP.NET Core
-            and React applications across different domains.
+            experience as a Patient Care Coordinator. More recently I've been pushing into <strong>AI engineering</strong>:
+            AgentForge (a multi-LLM agent builder with real-time SSE streaming and tool calling) and
+            MedInsight API (a LangGraph-powered healthcare pipeline deployed on AWS with Terraform and Docker).
           </p>
           <p>
             I care about clean, purposeful code and getting projects across the finish line.
@@ -770,6 +771,7 @@
       </p>
       <div class="filter-tabs">
         <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="ai">AI</button>
         <button class="filter-btn" data-filter="web">Web Dev</button>
         <button class="filter-btn" data-filter="game">Game Dev</button>
       </div>
@@ -873,14 +875,39 @@
         desc:     'Full-stack dental SaaS built from firsthand experience as a Patient Care Coordinator. Clinics photograph treatment plans; Claude Vision parses them into CDT-coded visit schedules. Patients review, confirm, and ask an AI chat assistant about their care — through an interactive SVG tooth chart with per-surface condition overlays.',
         tags:     ['React', 'Node.js', 'Express', 'MongoDB', 'Claude AI', 'JWT Auth', 'Vercel', 'Render'],
         category: 'web',
-        badge:    '🤖 AI-Powered · Live',
+        badge:    '🤖 AI-Powered · Shipped',
         badgeCls: 'badge-ai',
         icon:     '🦷',
         featured: true,
+        ai:       true,
         links:    [
           { text: 'Live Demo ↗', url: 'https://denta-vision.vercel.app' },
           { text: 'GitHub ↗',   url: 'https://github.com/Larmstrong1127/DentaVision' },
         ],
+      },
+      {
+        title:    'AgentForge',
+        role:     'Full-Stack AI Engineer',
+        desc:     'Multi-LLM agent builder platform. Create, configure, and chat with AI agents powered by OpenAI and Anthropic. Features real-time SSE token streaming, a tool-calling loop with live execution trace sidebar, parallel model comparison with latency benchmarking, and persistent conversation history via Prisma + SQLite.',
+        tags:     ['Next.js 14', 'TypeScript', 'Tailwind CSS', 'Prisma', 'OpenAI', 'Anthropic', 'SSE Streaming', 'Tool Calling'],
+        category: 'web',
+        ai:       true,
+        badge:    '🤖 AI Platform',
+        badgeCls: 'badge-ai',
+        icon:     '🧠',
+        links:    [{ text: 'GitHub ↗', url: 'https://github.com/Larmstrong1127/agentforge' }],
+      },
+      {
+        title:    'MedInsight API',
+        role:     'AI / Cloud Engineer',
+        desc:     'Healthcare AI REST API for processing clinical notes. LangGraph-powered multi-step analysis pipeline with RAG, built on FastAPI. AWS infrastructure provisioned with Terraform and containerized with Docker for scalable, reproducible cloud deployment.',
+        tags:     ['Python', 'FastAPI', 'LangGraph', 'AWS', 'Terraform', 'Docker', 'RAG', 'Claude AI'],
+        category: 'web',
+        ai:       true,
+        badge:    '🤖 AI / Cloud',
+        badgeCls: 'badge-ai',
+        icon:     '🏥',
+        links:    [{ text: 'GitHub ↗', url: 'https://github.com/Larmstrong1127/medinsight-api' }],
       },
       {
         title:    'Echoed Nights',
@@ -933,11 +960,11 @@
 
     // hot = number of leading items to highlight as core/primary skills
     const SKILLS = [
-      { group: '🌐 Web & Frameworks',   hot: 5, items: ['React', 'Node.js', 'Express.js', 'REST APIs', 'ASP.NET Core', 'Entity Framework Core', 'MVC', 'Bootstrap', 'JWT Auth'] },
-      { group: '💻 Languages',          hot: 4, items: ['JavaScript', 'Python', 'C#', 'SQL', 'Java', 'HTML', 'CSS', 'C++', 'PHP', 'R', 'Linux'] },
-      { group: '🗄 Databases & Cloud',  hot: 4, items: ['MongoDB', 'MySQL', 'SQLite', 'AWS', 'MongoDB Atlas', 'Mongoose', 'NoSQL', 'Database Management'] },
-      { group: '🤖 AI & ML',            hot: 3, items: ['Claude AI', 'Anthropic API', 'AI Prompt Engineering', 'Claude Code', 'Machine Learning', 'Neural Networks', 'Artificial Intelligence'] },
-      { group: '🛠 Tools & Practices',  hot: 4, items: ['Git', 'GitHub', 'VS Code', 'Agile', 'Visual Studio', 'OOP', 'npm', 'APIs', 'dotenv', 'Microsoft Office', 'MSVC', 'RStudio'] },
+      { group: '🌐 Web & Frameworks',   hot: 6, items: ['React', 'Next.js', 'Node.js', 'Express.js', 'FastAPI', 'TypeScript', 'REST APIs', 'ASP.NET Core', 'Entity Framework Core', 'MVC', 'Bootstrap', 'JWT Auth'] },
+      { group: '💻 Languages',          hot: 4, items: ['JavaScript', 'TypeScript', 'Python', 'C#', 'SQL', 'Java', 'HTML', 'CSS', 'C++', 'PHP', 'R'] },
+      { group: '🗄 Databases & Cloud',  hot: 5, items: ['MongoDB', 'MySQL', 'SQLite', 'Prisma', 'AWS', 'Docker', 'Terraform', 'MongoDB Atlas', 'Mongoose', 'NoSQL'] },
+      { group: '🤖 AI & ML',            hot: 4, items: ['Claude AI', 'Anthropic API', 'OpenAI API', 'LangGraph', 'Tool Calling', 'SSE Streaming', 'RAG', 'AI Prompt Engineering', 'Machine Learning', 'Neural Networks'] },
+      { group: '🛠 Tools & Practices',  hot: 4, items: ['Git', 'GitHub', 'VS Code', 'Agile', 'Docker', 'Terraform', 'Visual Studio', 'OOP', 'npm', 'APIs'] },
       { group: '🎮 Game Development',   hot: 2, items: ['Unity 3D', 'C# (Unity)', 'NavMesh', 'AI State Machines', 'Unreal Engine 5', 'Blueprints', 'Game Design'] },
     ];
 
@@ -977,7 +1004,7 @@
     function renderProjects(filter = 'all') {
       const grid = document.getElementById('projectsGrid');
       grid.innerHTML = '';
-      const list = filter === 'all' ? PROJECTS : PROJECTS.filter(p => p.category === filter);
+      const list = filter === 'all' ? PROJECTS : filter === 'ai' ? PROJECTS.filter(p => p.ai) : PROJECTS.filter(p => p.category === filter);
       list.forEach((p, i) => {
         const tags  = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
         const links = p.links.map(l =>
