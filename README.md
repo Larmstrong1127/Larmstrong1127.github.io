@@ -4,7 +4,7 @@ Personal developer portfolio built with vanilla HTML, CSS, and JavaScript. No fr
 
 **Developer:** Landon Armstrong
 **GitHub:** [Larmstrong1127](https://github.com/Larmstrong1127)
-**Email:** Landon.Armstrong@stmartin.edu
+**Email:** La.armstrong19@gmail.com
 
 ---
 
