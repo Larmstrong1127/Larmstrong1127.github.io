@@ -635,6 +635,7 @@
         <li><a href="#projects">Projects</a></li>
         <li><a href="#skills">Skills</a></li>
         <li><a href="#experience">Experience</a></li>
+        <li><a href="assets/Landon_Armstrong_Resume.pdf" download>Resume ⬇</a></li>
         <li><a href="#contact" class="nav-cta">Contact</a></li>
       </ul>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
@@ -648,6 +649,7 @@
     <a href="#projects"   onclick="closeMobile()">Projects</a>
     <a href="#skills"     onclick="closeMobile()">Skills</a>
     <a href="#experience" onclick="closeMobile()">Experience</a>
+    <a href="assets/Landon_Armstrong_Resume.pdf" download onclick="closeMobile()">Resume ⬇</a>
     <a href="#contact"    onclick="closeMobile()">Contact</a>
   </div>
 
@@ -682,6 +684,7 @@
 
           <div class="hero-cta">
             <a href="#projects" class="btn btn-accent">View My Work</a>
+            <a href="assets/Landon_Armstrong_Resume.pdf" download class="btn btn-ghost">⬇ Resume</a>
             <a href="https://github.com/Larmstrong1127" target="_blank" rel="noopener" class="btn btn-ghost">GitHub ↗</a>
           </div>
 
@@ -723,13 +726,14 @@
             where I earned Dean's List recognition every year from 2019 to 2024.
           </p>
           <p>
-            I've built an <strong>end-to-end Unity horror game</strong> (Echoed Nights) with full
-            ownership — from design and AI architecture through final QA. I've also built and shipped
-            <strong>DentaVision</strong> — a live, full-stack AI SaaS integrating Claude Vision to
-            parse dental treatment plans into patient-facing visit schedules, drawing directly on my
-            experience as a Patient Care Coordinator. More recently I've been pushing into <strong>AI engineering</strong>:
-            AgentForge (a multi-LLM agent builder with real-time SSE streaming and tool calling) and
-            MedInsight API (a LangGraph-powered healthcare pipeline deployed on AWS with Terraform and Docker).
+            I've shipped an <strong>end-to-end Unity horror game</strong> (Echoed Nights) on Steam with full
+            ownership — design, AI architecture, and QA. I've also built and shipped
+            <strong>DentaVision</strong> — a live, full-stack AI SaaS using Claude Vision to
+            parse dental treatment plans into patient-facing visit schedules, built directly from
+            my experience as a Patient Care Coordinator. On the AI engineering side:
+            <strong>AgentForge</strong> (multi-LLM SSE streaming with tool calling), <strong>DocuChat</strong>
+            (end-to-end RAG pipeline with ChromaDB and FastAPI), and
+            <strong>MedInsight API</strong> (LangGraph pipeline on AWS ECS with Terraform and Docker).
           </p>
           <p>
             I care about clean, purposeful code and getting projects across the finish line.
@@ -745,16 +749,16 @@
             <div class="stat-label">Computer Science<br/>Saint Martin's Univ.</div>
           </div>
           <div class="stat-card">
-            <div class="stat-number">🎮</div>
-            <div class="stat-label">Unity Game<br/>Built End-to-End</div>
+            <div class="stat-number">4+</div>
+            <div class="stat-label">AI / Cloud<br/>Projects Shipped</div>
           </div>
           <div class="stat-card">
             <div class="stat-number">5×</div>
             <div class="stat-label">Dean's List<br/>2019 – 2024</div>
           </div>
           <div class="stat-card">
-            <div class="stat-number">1</div>
-            <div class="stat-label">Game Shipped<br/>to Steam</div>
+            <div class="stat-number">🎮</div>
+            <div class="stat-label">Game Published<br/>on Steam</div>
           </div>
         </div>
       </div>
@@ -849,7 +853,7 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
             GitHub
           </a>
-          <a href="https://github.com/Larmstrong1127" target="_blank" rel="noopener" class="contact-link">🗂 Portfolio Projects</a>
+          <a href="assets/Landon_Armstrong_Resume.pdf" download class="contact-link">⬇ Download Resume</a>
         </div>
         <p class="contact-note">Based in Issaquah, WA</p>
       </div>
@@ -900,14 +904,26 @@
       {
         title:    'MedInsight API',
         role:     'AI / Cloud Engineer',
-        desc:     'Healthcare AI REST API for processing clinical notes. LangGraph-powered multi-step analysis pipeline with RAG, built on FastAPI. AWS infrastructure provisioned with Terraform and containerized with Docker for scalable, reproducible cloud deployment.',
-        tags:     ['Python', 'FastAPI', 'LangGraph', 'AWS', 'Terraform', 'Docker', 'RAG', 'Claude AI'],
+        desc:     'Healthcare AI REST API for processing clinical notes. LangGraph-powered multi-agent pipeline with RAG retrieval, AES-256 field-level encryption, and HIPAA-aligned audit logging — containerized on AWS ECS Fargate with Terraform-provisioned infrastructure.',
+        tags:     ['Python', 'FastAPI', 'LangGraph', 'AWS ECS', 'Terraform', 'Docker', 'RAG', 'Claude AI', 'DynamoDB'],
         category: 'web',
         ai:       true,
         badge:    '🤖 AI / Cloud',
         badgeCls: 'badge-ai',
         icon:     '🏥',
         links:    [{ text: 'GitHub ↗', url: 'https://github.com/Larmstrong1127/medinsight-api' }],
+      },
+      {
+        title:    'DocuChat',
+        role:     'Full-Stack AI Engineer',
+        desc:     'RAG-powered document Q&A — upload a PDF or text file, ask questions, get grounded answers with source citations. End-to-end retrieval pipeline: sliding-window chunking, all-MiniLM-L6-v2 sentence embeddings, ChromaDB cosine vector search, and Claude-generated cited responses served via FastAPI.',
+        tags:     ['Python', 'FastAPI', 'ChromaDB', 'Sentence Transformers', 'Claude AI', 'RAG', 'Vanilla JS'],
+        category: 'web',
+        ai:       true,
+        badge:    '🤖 RAG Pipeline',
+        badgeCls: 'badge-ai',
+        icon:     '📄',
+        links:    [{ text: 'GitHub ↗', url: 'https://github.com/Larmstrong1127/docuchat' }],
       },
       {
         title:    'Echoed Nights',
@@ -960,12 +976,12 @@
 
     // hot = number of leading items to highlight as core/primary skills
     const SKILLS = [
-      { group: '🌐 Web & Frameworks',   hot: 6, items: ['React', 'Next.js', 'Node.js', 'Express.js', 'FastAPI', 'TypeScript', 'REST APIs', 'ASP.NET Core', 'Entity Framework Core', 'MVC', 'Bootstrap', 'JWT Auth'] },
-      { group: '💻 Languages',          hot: 4, items: ['JavaScript', 'TypeScript', 'Python', 'C#', 'SQL', 'Java', 'HTML', 'CSS', 'C++', 'PHP', 'R'] },
-      { group: '🗄 Databases & Cloud',  hot: 5, items: ['MongoDB', 'MySQL', 'SQLite', 'Prisma', 'AWS', 'Docker', 'Terraform', 'MongoDB Atlas', 'Mongoose', 'NoSQL'] },
-      { group: '🤖 AI & ML',            hot: 4, items: ['Claude AI', 'Anthropic API', 'OpenAI API', 'LangGraph', 'Tool Calling', 'SSE Streaming', 'RAG', 'AI Prompt Engineering', 'Machine Learning', 'Neural Networks'] },
-      { group: '🛠 Tools & Practices',  hot: 4, items: ['Git', 'GitHub', 'VS Code', 'Agile', 'Docker', 'Terraform', 'Visual Studio', 'OOP', 'npm', 'APIs'] },
-      { group: '🎮 Game Development',   hot: 2, items: ['Unity 3D', 'C# (Unity)', 'NavMesh', 'AI State Machines', 'Unreal Engine 5', 'Blueprints', 'Game Design'] },
+      { group: '🌐 Web & Frameworks',   hot: 6, items: ['React', 'Next.js', 'FastAPI', 'Node.js', 'Express.js', 'TypeScript', 'REST APIs', 'ASP.NET Core', 'Prisma', 'Entity Framework Core', 'JWT Auth', 'MVC'] },
+      { group: '💻 Languages',          hot: 4, items: ['JavaScript', 'TypeScript', 'Python', 'C#', 'SQL', 'Java', 'HTML', 'CSS'] },
+      { group: '🗄 Databases & Cloud',  hot: 5, items: ['MongoDB', 'MySQL', 'SQLite', 'AWS (ECS/S3/DynamoDB)', 'Docker', 'Terraform', 'ChromaDB', 'Prisma', 'MongoDB Atlas', 'NoSQL'] },
+      { group: '🤖 AI & ML',            hot: 5, items: ['Claude AI', 'OpenAI API', 'LangGraph', 'RAG', 'SSE Streaming', 'ChromaDB', 'Sentence Transformers', 'Tool Calling', 'Prompt Engineering', 'Anthropic API'] },
+      { group: '🛠 Tools & Practices',  hot: 4, items: ['Git', 'GitHub', 'VS Code', 'Agile', 'Visual Studio', 'OOP', 'REST APIs', 'npm'] },
+      { group: '🎮 Game Development',   hot: 2, items: ['Unity 3D', 'C# (Unity)', 'NavMesh', 'FSM AI', 'Game Design', 'Dynamic Difficulty'] },
     ];
 
     const EXPERIENCE = [
@@ -974,19 +990,18 @@
         title:   'Patient Care Coordinator',
         company: '425 Dental',
         bullets: [
-          'KPI monthly reports for executive leadership',
-          'Managed front-end data systems and patient recall workflows across a multi-provider practice',
-          'Collaborated on patient treatment planning with 10+ providers',
+          'Generated monthly KPI reports for executive leadership and identified scheduling gaps that improved capacity utilization across a 10+ provider multi-specialty practice',
+          'Managed patient recall workflows and front-end data systems; clinical experience directly informed the design and feature set of DentaVision',
+          'Collaborated on treatment planning with 10+ providers — translated clinical workflows into production software',
         ],
       },
       {
         date:    '2023 – 2024',
         title:   'Graduate Assistant / Teaching Assistant',
-        company: 'Saint Martin\'s University',
+        company: "Saint Martin's University",
         bullets: [
-          'Supported 8+ students per semester in CS coursework covering data structures, algorithms, and software engineering fundamentals',
-          'Mentored student teams on OOP design patterns, collaborative workflows, and software architecture decisions',
-          'Reviewed and assessed project code, delivering structured feedback that measurably improved technical thinking and outcomes',
+          'Supported 8+ students per semester through office hours, code reviews, and 1:1 debugging sessions across data structures, algorithms, and database coursework',
+          'Designed and graded project rubrics; delivered structured feedback that reinforced forward-thinking software design practices',
         ],
       },
       {
@@ -994,8 +1009,7 @@
         title:   'Sales Service Expert',
         company: '24HR Fitness — Issaquah',
         bullets: [
-          'Managed member onboarding workflows and CRM data entry for a high-volume fitness location',
-          'Consistently exceeded monthly enrollment targets through consultative selling and follow-through',
+          'Consistently exceeded monthly enrollment targets through consultative selling; onboarded new members and maintained long-term retention relationships',
         ],
       },
     ];
