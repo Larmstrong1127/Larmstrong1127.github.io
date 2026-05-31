@@ -1,5 +1,7 @@
 # Landon Armstrong — Developer Portfolio
 
+[![CI](https://github.com/Larmstrong1127/larmstrong1127.github.io/actions/workflows/ci.yml/badge.svg)](https://github.com/Larmstrong1127/larmstrong1127.github.io/actions/workflows/ci.yml)
+
 Personal developer portfolio built with vanilla HTML, CSS, and JavaScript. No frameworks required — just open `index.html` in a browser.
 
 **Developer:** Landon Armstrong
