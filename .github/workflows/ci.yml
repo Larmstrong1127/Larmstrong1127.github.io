@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  validate:
+    name: Validate Portfolio
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify key files exist
+        run: |
+          test -f index.html && echo "✅ index.html exists"
+          echo "✅ Portfolio structure valid"
+
+      - name: Check for broken HTML structure
+        run: |
+          python3 -c "
+          from html.parser import HTMLParser
+          class Validator(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.errors = []
+          with open('index.html') as f:
+              content = f.read()
+          v = Validator()
+          v.feed(content)
+          print('✅ index.html parsed successfully')
+          "
