@@ -66,6 +66,20 @@
 
     /* ── Intro ── */
     .intro { padding: 3.5rem 0 2.5rem; }
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1fr 168px;
+      gap: 2.5rem;
+      align-items: start;
+    }
+    .portrait {
+      width: 168px;
+      height: 168px;
+      object-fit: cover;
+      object-position: center top;
+      border-radius: 8px;
+      border: 1px solid var(--rule);
+    }
     .intro h1 {
       font-size: clamp(2rem, 5vw, 2.9rem);
       line-height: 1.15;
@@ -145,7 +159,7 @@
       display: grid;
       grid-template-columns: 170px 1fr;
       gap: 1.5rem;
-      padding: 1.5rem 0;
+      padding: 1.1rem 0;
     }
     .project + .project { border-top: 1px solid var(--rule); }
     .project-side { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-faint); line-height: 1.9; }
@@ -155,10 +169,12 @@
     .project .role { font-size: 0.82rem; color: var(--ink-faint); margin-bottom: 0.55rem; }
     .project p.desc { color: var(--ink-soft); font-size: 0.93rem; max-width: 600px; }
     .project img.thumb {
-      margin-top: 1rem;
+      margin-top: 0.9rem;
       border: 1px solid var(--rule);
       border-radius: 4px;
-      max-width: 480px;
+      max-width: 420px;
+      max-height: 240px;
+      object-fit: cover;
     }
 
     /* ── Experience ── */
@@ -191,6 +207,8 @@
 
     @media (max-width: 640px) {
       .project, .job, .skill-row { grid-template-columns: 1fr; gap: 0.3rem; }
+      .intro-grid { grid-template-columns: 1fr; }
+      .portrait { width: 132px; height: 132px; }
       nav.top a { margin-left: 0; margin-right: 1.2rem; }
       .intro { padding-top: 2.5rem; }
     }
@@ -200,7 +218,7 @@
 
   <header>
     <div class="wrap header-inner">
-      <a class="site-name" href="#">landon armstrong</a>
+      <a class="site-name" href="#">Landon Armstrong</a>
       <nav class="top">
         <a href="#projects">Projects</a>
         <a href="#experience">Experience</a>
@@ -214,18 +232,23 @@
 
     <!-- Intro + featured -->
     <section class="intro" id="top">
-      <h1>Software engineer who ships — full-stack web apps, AI systems, and a game on Steam.</h1>
-      <p>
-        I'm Landon Armstrong, based in Issaquah, WA. M.S. in Computer Science from Saint Martin's
-        University (Dean's List, 2019–2024). I build things end to end: design, implementation,
-        tests, CI/CD, and deployment.
-      </p>
-      <p class="meta">
-        <a href="https://github.com/Larmstrong1127">GitHub</a> ·
-        <a href="https://www.linkedin.com/in/landon-armstrong/">LinkedIn</a> ·
-        <a href="mailto:la.armstrong19@gmail.com">la.armstrong19@gmail.com</a> ·
-        <a href="assets/Landon_Armstrong_Resume.pdf" download>Resume (PDF)</a>
-      </p>
+      <div class="intro-grid">
+        <div>
+          <h1>Software engineer who ships — full-stack web apps, AI systems, and a game on Steam.</h1>
+          <p>
+            I'm Landon Armstrong, based in Issaquah, WA. M.S. in Computer Science from Saint Martin's
+            University (Dean's List, 2019–2024). I build things end to end: design, implementation,
+            tests, CI/CD, and deployment.
+          </p>
+          <p class="meta">
+            <a href="https://github.com/Larmstrong1127">GitHub</a> ·
+            <a href="https://www.linkedin.com/in/landon-armstrong/">LinkedIn</a> ·
+            <a href="mailto:la.armstrong19@gmail.com">la.armstrong19@gmail.com</a> ·
+            <a href="assets/Landon_Armstrong_Resume.pdf" download>Resume (PDF)</a>
+          </p>
+        </div>
+        <img class="portrait" src="assets/profile.jpg" alt="Landon Armstrong" />
+      </div>
 
       <div class="featured">
         <div class="featured-media">
@@ -253,25 +276,6 @@
     <!-- Projects -->
     <section id="projects">
       <div class="section-head">Selected projects</div>
-
-      <div class="project">
-        <div class="project-side">2025<br/>Published on Steam</div>
-        <div>
-          <h3><a href="https://store.steampowered.com/app/4340810/Echoed_Nights/" target="_blank" rel="noopener">Echoed Nights</a></h3>
-          <div class="role">Lead developer &amp; director</div>
-          <p class="desc">
-            First-person Unity horror game, shipped on Steam with full ownership from concept
-            through QA. NavMesh pathfinding, finite-state-machine enemy AI, and bi-weekly
-            stakeholder deliverables.
-          </p>
-          <img class="thumb" src="assets/echoed-nights-shot.png" alt="Echoed Nights gameplay" loading="lazy" />
-          <div class="links">
-            <a href="https://store.steampowered.com/app/4340810/Echoed_Nights/" target="_blank" rel="noopener">Steam page</a>
-            <a href="https://github.com/Larmstrong1127/Echoed-Nights" target="_blank" rel="noopener">Source</a>
-          </div>
-          <div class="stack-line">Unity · C# · NavMesh · FSM AI</div>
-        </div>
-      </div>
 
       <div class="project">
         <div class="project-side">2026<br/>AI platform</div>
@@ -320,6 +324,25 @@
       </div>
 
       <div class="project">
+        <div class="project-side">2025<br/>Published on Steam</div>
+        <div>
+          <h3><a href="https://store.steampowered.com/app/4340810/Echoed_Nights/" target="_blank" rel="noopener">Echoed Nights</a></h3>
+          <div class="role">Lead developer &amp; director</div>
+          <p class="desc">
+            First-person Unity horror game, shipped on Steam with full ownership from concept
+            through QA. NavMesh pathfinding, finite-state-machine enemy AI, and bi-weekly
+            stakeholder deliverables.
+          </p>
+          <img class="thumb" src="assets/echoed-nights-shot.png" alt="Echoed Nights gameplay" loading="lazy" />
+          <div class="links">
+            <a href="https://store.steampowered.com/app/4340810/Echoed_Nights/" target="_blank" rel="noopener">Steam page</a>
+            <a href="https://github.com/Larmstrong1127/Echoed-Nights" target="_blank" rel="noopener">Source</a>
+          </div>
+          <div class="stack-line">Unity · C# · NavMesh · FSM AI</div>
+        </div>
+      </div>
+
+      <div class="project">
         <div class="project-side">2024<br/>Team lead</div>
         <div>
           <h3><a href="https://github.com/Larmstrong1127/WAVets2Tech" target="_blank" rel="noopener">WAVets2Tech Portal</a></h3>
@@ -333,23 +356,6 @@
         </div>
       </div>
 
-      <div class="project">
-        <div class="project-side">2024<br/>.NET</div>
-        <div>
-          <h3><a href="https://github.com/Larmstrong1127/Game-Library-Website" target="_blank" rel="noopener">Game Library &amp; TechCon</a></h3>
-          <div class="role">Developer</div>
-          <p class="desc">
-            Two ASP.NET Core MVC applications: a game library with Identity auth, genre filtering,
-            pagination, and full CRUD; and a conference-management app with validation rules and an
-            admin dashboard. Both on Entity Framework Core.
-          </p>
-          <div class="links">
-            <a href="https://github.com/Larmstrong1127/Game-Library-Website" target="_blank" rel="noopener">Game Library</a>
-            <a href="https://github.com/Larmstrong1127/TechCon-Convention-Site" target="_blank" rel="noopener">TechCon</a>
-          </div>
-          <div class="stack-line">ASP.NET Core · C# · EF Core · SQLite · Identity</div>
-        </div>
-      </div>
     </section>
 
     <!-- Experience -->
