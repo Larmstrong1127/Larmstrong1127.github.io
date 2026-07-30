@@ -132,7 +132,7 @@
       border-collapse: collapse;
       font-family: var(--mono);
       font-size: 0.76rem;
-      min-width: 400px;
+      min-width: 340px;
     }
     table.numbers caption {
       text-align: left;
@@ -149,10 +149,10 @@
       letter-spacing: 0.06em;
       color: var(--ink-faint);
       border-bottom: 1px solid var(--rule);
-      padding: 0 1.4rem 0.32rem 0;
+      padding: 0 1.1rem 0.32rem 0;
     }
     table.numbers td {
-      padding: 0.34rem 1.4rem 0.34rem 0;
+      padding: 0.34rem 1.1rem 0.34rem 0;
       border-bottom: 1px solid #f1ede5;
       color: var(--ink-soft);
       white-space: nowrap;
@@ -258,6 +258,8 @@
       nav.top a { margin-left: 0; margin-right: 1.2rem; }
       .intro { padding-top: 2.5rem; }
       .featured-body { padding: 1.25rem 1.25rem 1.4rem; }
+      table.numbers { font-size: 0.72rem; min-width: 0; }
+      table.numbers th, table.numbers td { padding-right: 0.85rem; }
     }
   </style>
 </head>
@@ -281,12 +283,12 @@
     <section class="intro" id="top">
       <div class="intro-grid">
         <div>
-          <h1>Software engineer — I build LLM evaluation tooling, fine-tune small models, and write the cloud plumbing in between.</h1>
+          <h1>Software engineer — I build LLM evaluation tooling and fine-tune small models.</h1>
           <p>
             I'm Landon Armstrong, based in Issaquah, WA. M.S. in Computer Science from Saint Martin's
             University (Dean's List, 2019–2024). Lately most of my work has been ML infrastructure:
-            harnesses that measure whether a model is getting worse, and the training code behind the
-            models doing the measuring.
+            harnesses that measure whether a model is getting worse, the training code behind the
+            models doing the measuring, and the cloud plumbing that carries both.
           </p>
           <p>
             Before that, full-stack web apps and a horror game that shipped on Steam. I write the tests
