@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Landon Armstrong — Software Engineer & Game Developer, M.S. Computer Science, Saint Martin's University" />
+  <meta name="description" content="Landon Armstrong — Software Engineer. LLM evaluation tooling, fine-tuned models, and cloud infrastructure. M.S. Computer Science, Saint Martin's University." />
   <title>Landon Armstrong — Software Engineer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -124,6 +124,43 @@
     }
     .featured-body h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
     .featured-body p { color: var(--ink-soft); font-size: 0.95rem; max-width: 640px; }
+    .featured-body p + p { margin-top: 0.8rem; }
+
+    /* ── Measured-results table ── */
+    .numbers-wrap { overflow-x: auto; margin: 1.15rem 0 0.35rem; }
+    table.numbers {
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      min-width: 400px;
+    }
+    table.numbers caption {
+      text-align: left;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+      margin-bottom: 0.45rem;
+    }
+    table.numbers th {
+      text-align: left;
+      font-weight: 500;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-faint);
+      border-bottom: 1px solid var(--rule);
+      padding: 0 1.4rem 0.32rem 0;
+    }
+    table.numbers td {
+      padding: 0.34rem 1.4rem 0.34rem 0;
+      border-bottom: 1px solid #f1ede5;
+      color: var(--ink-soft);
+      white-space: nowrap;
+    }
+    table.numbers th:not(:first-child), table.numbers td:not(:first-child) { text-align: right; }
+    table.numbers th:last-child, table.numbers td:last-child { padding-right: 0; }
+    table.numbers tr.mine td { color: var(--ink); }
+    .table-note { font-size: 0.8rem; color: var(--ink-faint); margin-top: 0.55rem; }
 
     .links {
       margin-top: 1rem;
@@ -177,6 +214,15 @@
       object-fit: cover;
     }
 
+    .aside {
+      margin-top: 2.1rem;
+      padding-top: 1.4rem;
+      border-top: 1px solid var(--rule);
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+      max-width: 640px;
+    }
+
     /* ── Experience ── */
     .job { display: grid; grid-template-columns: 170px 1fr; gap: 1.5rem; padding: 1.1rem 0; }
     .job + .job { border-top: 1px solid var(--rule); }
@@ -211,6 +257,7 @@
       .portrait { width: 132px; height: 132px; }
       nav.top a { margin-left: 0; margin-right: 1.2rem; }
       .intro { padding-top: 2.5rem; }
+      .featured-body { padding: 1.25rem 1.25rem 1.4rem; }
     }
   </style>
 </head>
@@ -234,11 +281,16 @@
     <section class="intro" id="top">
       <div class="intro-grid">
         <div>
-          <h1>Software engineer who ships — full-stack web apps, AI systems, and a game on Steam.</h1>
+          <h1>Software engineer — I build LLM evaluation tooling, fine-tune small models, and write the cloud plumbing in between.</h1>
           <p>
             I'm Landon Armstrong, based in Issaquah, WA. M.S. in Computer Science from Saint Martin's
-            University (Dean's List, 2019–2024). I build things end to end: design, implementation,
-            tests, CI/CD, and deployment.
+            University (Dean's List, 2019–2024). Lately most of my work has been ML infrastructure:
+            harnesses that measure whether a model is getting worse, and the training code behind the
+            models doing the measuring.
+          </p>
+          <p>
+            Before that, full-stack web apps and a horror game that shipped on Steam. I write the tests
+            and the CI for my own projects, which is where most of what I know came from.
           </p>
           <p class="meta">
             <a href="https://github.com/Larmstrong1127">GitHub</a> ·
@@ -251,24 +303,68 @@
       </div>
 
       <div class="featured">
-        <div class="featured-media">
-          <img src="assets/dentavision-dash.png" alt="DentaVision clinic dashboard" loading="eager" />
-        </div>
         <div class="featured-body">
-          <div class="featured-kicker">Featured · Live in production</div>
-          <h2>DentaVision</h2>
+          <div class="featured-kicker">Featured · Open source</div>
+          <h2>EvalForge</h2>
           <p>
-            Full-stack dental SaaS built from my experience as a patient care coordinator.
-            Clinics photograph printed treatment plans; Claude Vision parses them into CDT-coded,
-            visit-by-visit schedules that patients review through an interactive SVG tooth chart
-            and an AI chat assistant. 20 Jest tests gate every deploy through GitHub Actions to
-            Vercel and Render.
+            An LLM evaluation platform. Define a prompt suite, run it concurrently against Claude,
+            OpenAI, Gemini or a local Ollama model, score the outputs with pluggable judges, collect
+            blind human preference votes, and diff any two runs to catch a regression. Two of the
+            judges aren't API calls — they're models I fine-tuned and published.
+          </p>
+          <p>
+            The more useful half of that work is where they fail. The hallucination detector scores
+            F1&nbsp;0.99 in-distribution and 0.51 on RAGTruth, a held-out set of hallucinations from
+            real RAG systems. Choosing the checkpoint on validation F1 alone would have shipped the
+            worst of the three at generalizing, which is the whole reason RAGTruth was quarantined
+            from training to begin with.
+          </p>
+
+          <div class="numbers-wrap">
+            <table class="numbers">
+              <caption>Hallucination judge vs. cloud judges — 200 RAGTruth examples</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Judge</th>
+                  <th scope="col">Agreement</th>
+                  <th scope="col">Cost / 1K</th>
+                  <th scope="col">p50 latency</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="mine">
+                  <td>local DeBERTa (mine)</td><td>47.5%</td><td>$0.00</td><td>27 ms</td>
+                </tr>
+                <tr><td>claude-sonnet-5</td><td>85.0%</td><td>$4.06</td><td>1,466 ms</td></tr>
+                <tr><td>gpt-4o</td><td>82.5%</td><td>$2.03</td><td>1,311 ms</td></tr>
+                <tr><td>gemini-2.5-flash-lite</td><td>78.5%</td><td>$0.08</td><td>1,182 ms</td></tr>
+              </tbody>
+            </table>
+            <p class="table-note">Generated from the benchmark's own results file, not typed by hand.</p>
+          </div>
+
+          <p>
+            Free and far faster, and still not a substitute for a paid judge on unfamiliar data — its
+            honest job today is a cheap first-pass filter. The second model is a 184M-parameter
+            Bradley-Terry preference reward model: 0.7026 pairwise accuracy on held-out UltraFeedback
+            against 0.6009 for a public model 2.4x its size, measured in the same harness rather than
+            asserted. On fifteen of my own blind votes it falls to chance, which is the result I would
+            want to know as a reviewer.
+          </p>
+          <p>
+            A later self-audit caught the kind of bug that never throws: the reward judge was serving
+            at a 1024-token budget against a checkpoint trained at 512, so 39% of held-out pairs were
+            being scored off-regime. The sequence length is now derived from the checkpoint's own
+            config instead of restated in three files. CI runs a fixed suite against a pinned local
+            model on every pull request and fails the build if scores collapse — the platform gates
+            itself with itself.
           </p>
           <div class="links">
-            <a href="https://denta-vision.vercel.app" target="_blank" rel="noopener">Live demo</a>
-            <a href="https://github.com/Larmstrong1127/DentaVision" target="_blank" rel="noopener">Source</a>
+            <a href="https://github.com/Larmstrong1127/evalforge" target="_blank" rel="noopener">Source</a>
+            <a href="https://huggingface.co/DantheMan124/deberta-hallucination-judge" target="_blank" rel="noopener">Hallucination judge</a>
+            <a href="https://huggingface.co/DantheMan124/deberta-preference-reward" target="_blank" rel="noopener">Reward model</a>
           </div>
-          <div class="stack-line">React · Node.js · Express · MongoDB · Claude API · JWT · Jest · GitHub Actions</div>
+          <div class="stack-line">Python · PyTorch · DeBERTa · FastAPI · Next.js · TypeScript · PostgreSQL</div>
         </div>
       </div>
     </section>
@@ -278,48 +374,59 @@
       <div class="section-head">Selected projects</div>
 
       <div class="project">
-        <div class="project-side">2026<br/>AI platform</div>
-        <div>
-          <h3><a href="https://github.com/Larmstrong1127/agentforge" target="_blank" rel="noopener">AgentForge</a></h3>
-          <div class="role">Full-stack AI engineer</div>
-          <p class="desc">
-            Multi-LLM agent builder: create, configure, and chat with agents on OpenAI or Anthropic
-            models. Real-time SSE token streaming, a tool-calling loop with a live execution trace,
-            parallel model comparison with latency benchmarks, and persistent history via Prisma.
-          </p>
-          <div class="links"><a href="https://github.com/Larmstrong1127/agentforge" target="_blank" rel="noopener">Source</a></div>
-          <div class="stack-line">Next.js 14 · TypeScript · Prisma · OpenAI · Anthropic · SSE</div>
-        </div>
-      </div>
-
-      <div class="project">
         <div class="project-side">2026<br/>Cloud / healthcare</div>
         <div>
           <h3><a href="https://github.com/Larmstrong1127/medinsight-api" target="_blank" rel="noopener">MedInsight API</a></h3>
-          <div class="role">AI / cloud engineer</div>
+          <div class="role">Backend &amp; cloud</div>
           <p class="desc">
-            Healthcare REST API for clinical notes: LangGraph multi-agent pipeline with RAG
-            retrieval, field-level AES-256 encryption, and HIPAA-aligned audit logging.
-            Containerized on AWS ECS Fargate with Terraform-provisioned infrastructure;
-            40 pytest tests cover auth, CRUD, encryption, and the audit trail.
+            A clinical-document API: upload a note, get back a summary, extracted diagnoses, or a risk
+            assessment from a LangGraph ReAct agent with four tools over the document store. Document
+            text is encrypted at rest with Fernet, every access is written to a DynamoDB audit log, and
+            deploys authenticate to AWS over OIDC so no long-lived keys sit in the repo. Infrastructure
+            is four Terraform modules — networking, security, storage, ECS Fargate. 40 pytest tests
+            cover auth, the document service, encryption round-trips, and the audit trail.
           </p>
           <div class="links"><a href="https://github.com/Larmstrong1127/medinsight-api" target="_blank" rel="noopener">Source</a></div>
-          <div class="stack-line">Python · FastAPI · LangGraph · AWS ECS · Terraform · Docker · DynamoDB</div>
+          <div class="stack-line">Python · FastAPI · LangGraph · AWS ECS · Terraform · DynamoDB · Docker</div>
         </div>
       </div>
 
       <div class="project">
-        <div class="project-side">2026<br/>RAG pipeline</div>
+        <div class="project-side">2026<br/>AI platform</div>
         <div>
-          <h3><a href="https://github.com/Larmstrong1127/docuchat" target="_blank" rel="noopener">DocuChat</a></h3>
-          <div class="role">Full-stack AI engineer</div>
+          <h3><a href="https://github.com/Larmstrong1127/agentforge" target="_blank" rel="noopener">AgentForge</a></h3>
+          <div class="role">Full-stack</div>
           <p class="desc">
-            Document Q&amp;A with grounded, cited answers. End-to-end retrieval: sliding-window
-            chunking, local sentence-transformer embeddings, ChromaDB cosine search, and
-            Claude-generated responses with source citations, served from FastAPI.
+            Build an agent, point it at an OpenAI or Anthropic model, give it tools, and talk to it.
+            Tokens stream over SSE, and a sidebar traces every tool call with its input and output —
+            that trace is the part I actually use, because a wrong answer is usually a wrong tool call,
+            and without it you are guessing. A single prompt can also be fanned out across several
+            models to compare latency side by side. Search is DuckDuckGo's keyless Instant Answer API,
+            which returns nothing useful for narrow queries; the tool says so rather than inventing an
+            answer.
           </p>
-          <div class="links"><a href="https://github.com/Larmstrong1127/docuchat" target="_blank" rel="noopener">Source</a></div>
-          <div class="stack-line">Python · FastAPI · ChromaDB · Sentence Transformers · Claude API</div>
+          <div class="links"><a href="https://github.com/Larmstrong1127/agentforge" target="_blank" rel="noopener">Source</a></div>
+          <div class="stack-line">Next.js 14 · TypeScript · Prisma · SQLite · OpenAI · Anthropic · SSE</div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-side">2026<br/>Full-stack SaaS</div>
+        <div>
+          <h3><a href="https://denta-vision.vercel.app" target="_blank" rel="noopener">DentaVision</a></h3>
+          <div class="role">Solo developer</div>
+          <p class="desc">
+            Dental treatment-planning SaaS that came out of my day job coordinating patient care.
+            Clinics photograph a printed treatment plan; Claude parses it into a CDT-coded,
+            visit-by-visit schedule the patient reviews through an interactive SVG tooth chart. 20 Jest
+            tests gate every deploy through GitHub Actions to Vercel and Render.
+          </p>
+          <img class="thumb" src="assets/dentavision-dash.png" alt="DentaVision clinic dashboard" loading="lazy" />
+          <div class="links">
+            <a href="https://denta-vision.vercel.app" target="_blank" rel="noopener">Live demo</a>
+            <a href="https://github.com/Larmstrong1127/DentaVision" target="_blank" rel="noopener">Source</a>
+          </div>
+          <div class="stack-line">React · Node.js · Express · MongoDB · Claude API · JWT · Jest</div>
         </div>
       </div>
 
@@ -336,7 +443,7 @@
           <img class="thumb" src="assets/echoed-nights-shot.png" alt="Echoed Nights gameplay" loading="lazy" />
           <div class="links">
             <a href="https://store.steampowered.com/app/4340810/Echoed_Nights/" target="_blank" rel="noopener">Steam page</a>
-            <a href="https://github.com/Larmstrong1127/Echoed-Nights" target="_blank" rel="noopener">Source</a>
+            <a href="https://github.com/Larmstrong1127/Echoed-Nights-Video-Game" target="_blank" rel="noopener">Source</a>
           </div>
           <div class="stack-line">Unity · C# · NavMesh · FSM AI</div>
         </div>
@@ -355,6 +462,14 @@
           <div class="stack-line">HTML · CSS · JavaScript</div>
         </div>
       </div>
+
+      <p class="aside">
+        Not on this list, because it is neither open source nor a product: a personal video-automation
+        system I have been building since June — roughly 105,000 lines of Python across 480 modules and
+        160 test files, with a GPU lock so two render jobs cannot fight over the same card and a
+        scheduler that runs shifts unattended. It is where I learned what actually breaks when a
+        pipeline has to run without anyone watching it.
+      </p>
 
     </section>
 
@@ -402,10 +517,11 @@
     <section id="skills">
       <div class="section-head">Skills</div>
       <dl>
-        <div class="skill-row"><dt>Languages</dt><dd>JavaScript / TypeScript, Python, C#, SQL, Java</dd></div>
-        <div class="skill-row"><dt>Web</dt><dd>React, Next.js, Node.js / Express, FastAPI, ASP.NET Core, REST APIs, Prisma, EF Core</dd></div>
-        <div class="skill-row"><dt>AI / ML</dt><dd>Claude &amp; OpenAI APIs, LangGraph, RAG pipelines, ChromaDB, sentence transformers, SSE streaming, tool calling</dd></div>
-        <div class="skill-row"><dt>Cloud / infra</dt><dd>AWS (ECS, S3, DynamoDB), Docker, Terraform, GitHub Actions CI/CD, MongoDB Atlas, MySQL, SQLite</dd></div>
+        <div class="skill-row"><dt>Languages</dt><dd>Python, JavaScript / TypeScript, C#, SQL, Java</dd></div>
+        <div class="skill-row"><dt>ML</dt><dd>PyTorch (hand-written training loops), transformer fine-tuning, Bradley-Terry reward modeling, temperature calibration, eval-harness design, Hugging Face Hub</dd></div>
+        <div class="skill-row"><dt>LLM systems</dt><dd>Claude &amp; OpenAI APIs, LangGraph agents, tool calling, SSE streaming, RAG pipelines, ChromaDB, sentence transformers</dd></div>
+        <div class="skill-row"><dt>Cloud / infra</dt><dd>AWS (ECS Fargate, S3, DynamoDB, KMS), Terraform, Docker, GitHub Actions CI/CD with OIDC, PostgreSQL, MongoDB Atlas</dd></div>
+        <div class="skill-row"><dt>Web</dt><dd>React, Next.js, FastAPI, Node.js / Express, ASP.NET Core, Prisma, REST APIs</dd></div>
         <div class="skill-row"><dt>Games</dt><dd>Unity 3D, NavMesh, FSM enemy AI, game design</dd></div>
       </dl>
     </section>
@@ -425,8 +541,9 @@
     <section id="contact" class="contact">
       <div class="section-head">Contact</div>
       <p>
-        I'm looking for an entry-level software engineering role where I can contribute across
-        the stack. The fastest way to reach me is email.
+        I'm looking for my first full-time software engineering role — ML infrastructure, backend, or
+        cloud. Happy to walk through any of the projects above in detail, including the parts that
+        didn't work. The fastest way to reach me is email.
       </p>
       <div class="links">
         <a href="mailto:la.armstrong19@gmail.com">la.armstrong19@gmail.com</a>
