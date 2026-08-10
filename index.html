@@ -457,11 +457,15 @@
           <h3><a href="https://denta-vision.vercel.app" target="_blank" rel="noopener">DentaVision</a></h3>
           <div class="role">Solo developer</div>
           <p class="desc">
-            Dental treatment-planning SaaS that came out of my day job coordinating patient care.
-            Clinics photograph a printed treatment plan; Claude parses it into a CDT-coded,
-            visit-by-visit schedule the patient reviews through an interactive SVG tooth chart. 20 Jest
-            tests cover the auth and API layer, and a GitHub Actions pipeline gates every deploy —
-            backend to Render, frontend to Vercel.
+            A patient-facing layer for dental treatment plans, built out of my day job coordinating
+            patient care. It deliberately does not compete with a practice's existing software: the
+            coordinator scans, uploads, or types in the plan the practice already produced, Claude
+            parses it into plain language, and the patient gets one simple view of what is
+            recommended, what is urgent, and what they have already had done, on an interactive SVG
+            tooth chart. Working from an upload rather than a practice-management integration is the
+            product decision I would defend hardest — it means a clinic can adopt it without waiting
+            on their software vendor. 20 Jest tests cover the auth and API layer, and a GitHub Actions
+            pipeline gates every deploy — backend to Render, frontend to Vercel.
           </p>
           <img class="thumb" src="assets/dentavision-dash.png" alt="DentaVision clinic dashboard showing patient counts, plan coverage, and treatment-acceptance metrics" width="1280" height="800" loading="lazy" decoding="async" />
           <div class="links">
