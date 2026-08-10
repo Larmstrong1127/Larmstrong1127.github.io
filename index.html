@@ -3,8 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Landon Armstrong — Software Engineer. LLM evaluation tooling, fine-tuned models, and cloud infrastructure. M.S. Computer Science, Saint Martin's University." />
-  <title>Landon Armstrong — Software Engineer</title>
+  <meta name="description" content="Landon Armstrong — M.S. Computer Science. I build LLM evaluation tooling and fine-tune the small models that do the evaluating. Two published models, measured against public baselines." />
+  <title>Landon Armstrong — LLM Evaluation &amp; ML Infrastructure</title>
+  <link rel="canonical" href="https://larmstrong1127.github.io/" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231d4ed8'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='17' fill='%23ffffff' text-anchor='middle'%3ELA%3C/text%3E%3C/svg%3E" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://larmstrong1127.github.io/" />
+  <meta property="og:title" content="Landon Armstrong — LLM Evaluation &amp; ML Infrastructure" />
+  <meta property="og:description" content="M.S. Computer Science. I build LLM evaluation tooling and fine-tune the small models that do the evaluating. Two published models, measured against public baselines." />
+  <meta property="og:image" content="https://larmstrong1127.github.io/assets/profile.jpg" />
+  <meta name="twitter:card" content="summary" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -15,7 +25,7 @@
       --paper:      #faf8f4;
       --ink:        #1c1b18;
       --ink-soft:   #57534a;
-      --ink-faint:  #8a857a;
+      --ink-faint:  #767162;
       --rule:       #e2ddd3;
       --accent:     #1d4ed8;
       --card:       #ffffff;
@@ -158,9 +168,11 @@
       white-space: nowrap;
     }
     table.numbers th:not(:first-child), table.numbers td:not(:first-child) { text-align: right; }
+    table.numbers td:first-child { white-space: normal; min-width: 11rem; }
     table.numbers th:last-child, table.numbers td:last-child { padding-right: 0; }
     table.numbers tr.mine td { color: var(--ink); }
-    .table-note { font-size: 0.8rem; color: var(--ink-faint); margin-top: 0.55rem; }
+    .table-note { font-size: 0.8rem; color: var(--ink-faint); margin-top: 0.55rem; max-width: 640px; line-height: 1.55; }
+    .code { font-family: var(--mono); font-size: 0.94em; }
 
     .links {
       margin-top: 1rem;
@@ -209,18 +221,11 @@
       margin-top: 0.9rem;
       border: 1px solid var(--rule);
       border-radius: 4px;
-      max-width: 420px;
+      width: 420px;
+      max-width: 100%;
+      height: auto;
       max-height: 240px;
       object-fit: cover;
-    }
-
-    .aside {
-      margin-top: 2.1rem;
-      padding-top: 1.4rem;
-      border-top: 1px solid var(--rule);
-      color: var(--ink-soft);
-      font-size: 0.9rem;
-      max-width: 640px;
     }
 
     /* ── Experience ── */
@@ -267,11 +272,11 @@
 
   <header>
     <div class="wrap header-inner">
-      <a class="site-name" href="#">Landon Armstrong</a>
-      <nav class="top">
+      <a class="site-name" href="#top">Landon Armstrong</a>
+      <nav class="top" aria-label="Primary">
         <a href="#projects">Projects</a>
         <a href="#experience">Experience</a>
-        <a href="assets/Landon_Armstrong_Resume.pdf" download>Resume</a>
+        <a href="assets/Landon_Armstrong_Resume.pdf" target="_blank" rel="noopener">Resume</a>
         <a href="#contact">Contact</a>
       </nav>
     </div>
@@ -283,25 +288,29 @@
     <section class="intro" id="top">
       <div class="intro-grid">
         <div>
-          <h1>Software engineer — I build LLM evaluation tooling and fine-tune small models.</h1>
+          <h1>I build LLM evaluation tooling — and fine-tune the small models that do the evaluating.</h1>
           <p>
             I'm Landon Armstrong, based in Issaquah, WA. M.S. in Computer Science from Saint Martin's
-            University (Dean's List, 2019–2024). Lately most of my work has been ML infrastructure:
-            harnesses that measure whether a model is getting worse, the training code behind the
-            models doing the measuring, and the cloud plumbing that carries both.
+            University (Dean's List, 2019–2024). My work is ML infrastructure: harnesses that measure
+            whether a model is getting worse, the training code behind the models doing the measuring,
+            and the cloud plumbing that carries both. Two of those models are published on Hugging
+            Face — one of them beats a public reward model 2.4&times; its size on the distribution it
+            was built for.
           </p>
           <p>
-            Before that, full-stack web apps and a horror game that shipped on Steam. I write the tests
-            and the CI for my own projects, which is where most of what I know came from.
+            Before the ML work: full-stack web apps and a horror game that shipped on Steam. I trained
+            in CS through a B.S., an M.S., and a graduate teaching assistantship, and I'm building in
+            public while I work outside the field. Every number on this page comes out of a results
+            file I can show you — including the ones that didn't go my way.
           </p>
           <p class="meta">
             <a href="https://github.com/Larmstrong1127">GitHub</a> ·
             <a href="https://www.linkedin.com/in/landon-armstrong/">LinkedIn</a> ·
             <a href="mailto:la.armstrong19@gmail.com">la.armstrong19@gmail.com</a> ·
-            <a href="assets/Landon_Armstrong_Resume.pdf" download>Resume (PDF)</a>
+            <a href="assets/Landon_Armstrong_Resume.pdf" target="_blank" rel="noopener">Resume (PDF)</a>
           </p>
         </div>
-        <img class="portrait" src="assets/profile.jpg" alt="Landon Armstrong" />
+        <img class="portrait" src="assets/profile.jpg" alt="Portrait of Landon Armstrong" width="800" height="800" />
       </div>
 
       <div class="featured">
@@ -309,10 +318,11 @@
           <div class="featured-kicker">Featured · Open source</div>
           <h2>EvalForge</h2>
           <p>
-            An LLM evaluation platform. Define a prompt suite, run it concurrently against Claude,
-            OpenAI, Gemini or a local Ollama model, score the outputs with pluggable judges, collect
-            blind human preference votes, and diff any two runs to catch a regression. Two of the
-            judges aren't API calls — they're models I fine-tuned and published.
+            An open-source platform for automating LLM evaluation end to end. Define a prompt suite
+            once; it runs concurrently against Claude, OpenAI, Gemini or a local Ollama model, scores
+            every output with pluggable judges, collects blind human preference votes, and diffs any
+            two runs so a regression surfaces before a human notices it. Two of the judges aren't API
+            calls — they're models I fine-tuned and published to Hugging Face.
           </p>
           <p>
             The more useful half of that work is where they fail. The hallucination detector scores
@@ -348,18 +358,46 @@
           <p>
             Free and far faster, and still not a substitute for a paid judge on unfamiliar data — its
             honest job today is a cheap first-pass filter. The second model is a 184M-parameter
-            Bradley-Terry preference reward model: 0.7026 pairwise accuracy on held-out UltraFeedback
-            against 0.6009 for a public model 2.4x its size, measured in the same harness rather than
-            asserted. On fifteen of my own blind votes it falls to chance, which is the result I would
-            want to know as a reviewer.
+            Bradley-Terry preference reward model, trained with a hand-written PyTorch loop. I ran a
+            public reward model 2.4&times; its size through the same harness on the same split, because
+            a number is only worth what you compare it against.
           </p>
+
+          <div class="numbers-wrap">
+            <table class="numbers">
+              <caption>Preference reward model — UltraFeedback <span class="code">test_prefs</span>, one harness, 512-token budget</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Model</th>
+                  <th scope="col">Params</th>
+                  <th scope="col">N</th>
+                  <th scope="col">Pairwise acc.</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Chance floor</td><td>—</td><td>—</td><td>0.5000</td></tr>
+                <tr><td>OpenAssistant reward-model-deberta-v3-large-v2</td><td>435M</td><td>1,987</td><td>0.6009</td></tr>
+                <tr class="mine"><td>mine — in-distribution</td><td>184M</td><td>1,987</td><td>0.7026</td></tr>
+                <tr><td>mine — 15 blind human votes (out-of-distribution)</td><td>184M</td><td>15</td><td>0.4000</td></tr>
+              </tbody>
+            </table>
+            <p class="table-note">
+              Read that honestly: my model is scored in-distribution and the public baseline is not — it
+              was trained on a different preference mixture entirely. The comparison says 0.7026 is a
+              real number rather than a collapsed one (a failed learning-rate run sat at 0.5098), not
+              that mine is the better reward model. The last row is the inverse: on fifteen genuine
+              blind votes of my own it drops to chance. Neither model generalizes for free.
+            </p>
+          </div>
           <p>
             A later self-audit caught the kind of bug that never throws: the reward judge was serving
             at a 1024-token budget against a checkpoint trained at 512, so 39% of held-out pairs were
             being scored off-regime. The sequence length is now derived from the checkpoint's own
-            config instead of restated in three files. CI runs a fixed suite against a pinned local
-            model on every pull request and fails the build if scores collapse — the platform gates
-            itself with itself.
+            config instead of restated in three files. The published numbers survived the re-measurement
+            — the defect was in serving, not in reporting — but an unmeasured difference is not a small
+            one. CI now runs a fixed suite against a pinned local model on every pull request that
+            touches the API, and fails the build if scores collapse: the platform gates itself with
+            itself.
           </p>
           <div class="links">
             <a href="https://github.com/Larmstrong1127/evalforge" target="_blank" rel="noopener">Source</a>
@@ -373,7 +411,7 @@
 
     <!-- Projects -->
     <section id="projects">
-      <div class="section-head">Selected projects</div>
+      <h2 class="section-head">Selected projects</h2>
 
       <div class="project">
         <div class="project-side">2026<br/>Cloud / healthcare</div>
@@ -383,8 +421,9 @@
           <p class="desc">
             A clinical-document API: upload a note, get back a summary, extracted diagnoses, or a risk
             assessment from a LangGraph ReAct agent with four tools over the document store. Document
-            text is encrypted at rest with Fernet, every access is written to a DynamoDB audit log, and
-            deploys authenticate to AWS over OIDC so no long-lived keys sit in the repo. Infrastructure
+            text is encrypted at rest with Fernet, every document and analysis request is written to an
+            append-only audit log (DynamoDB in AWS, JSONL locally), and deploys authenticate to AWS over
+            OIDC so no long-lived keys sit in the repo. Infrastructure
             is four Terraform modules — networking, security, storage, ECS Fargate. 40 pytest tests
             cover auth, the document service, encryption round-trips, and the audit trail.
           </p>
@@ -408,7 +447,7 @@
             answer.
           </p>
           <div class="links"><a href="https://github.com/Larmstrong1127/agentforge" target="_blank" rel="noopener">Source</a></div>
-          <div class="stack-line">Next.js 14 · TypeScript · Prisma · SQLite · OpenAI · Anthropic · SSE</div>
+          <div class="stack-line">Next.js 16 · React 19 · TypeScript · Prisma · SQLite · OpenAI · Anthropic · SSE</div>
         </div>
       </div>
 
@@ -421,9 +460,10 @@
             Dental treatment-planning SaaS that came out of my day job coordinating patient care.
             Clinics photograph a printed treatment plan; Claude parses it into a CDT-coded,
             visit-by-visit schedule the patient reviews through an interactive SVG tooth chart. 20 Jest
-            tests gate every deploy through GitHub Actions to Vercel and Render.
+            tests cover the auth and API layer, and a GitHub Actions pipeline gates every deploy —
+            backend to Render, frontend to Vercel.
           </p>
-          <img class="thumb" src="assets/dentavision-dash.png" alt="DentaVision clinic dashboard" loading="lazy" />
+          <img class="thumb" src="assets/dentavision-dash.png" alt="DentaVision clinic dashboard showing patient counts, plan coverage, and treatment-acceptance metrics" width="1280" height="800" loading="lazy" decoding="async" />
           <div class="links">
             <a href="https://denta-vision.vercel.app" target="_blank" rel="noopener">Live demo</a>
             <a href="https://github.com/Larmstrong1127/DentaVision" target="_blank" rel="noopener">Source</a>
@@ -433,21 +473,44 @@
       </div>
 
       <div class="project">
+        <div class="project-side">2026<br/>Architecture showcase</div>
+        <div>
+          <h3><a href="https://github.com/Larmstrong1127/shorts-factory" target="_blank" rel="noopener">Shorts Factory</a></h3>
+          <div class="role">Solo developer &middot; source private by choice</div>
+          <p class="desc">
+            An autonomous short-form video pipeline that runs a weekly production window with nobody
+            at the keyboard: a local LLM drafts the script, Edge TTS voices it, FFmpeg composites it,
+            RealESRGAN upscales it, and it publishes itself to YouTube on a schedule. The parts I would
+            actually defend in a review are the operational ones — a GPU lock so two render jobs can't
+            fight over the same card, and a scheduler that runs shifts unattended and recovers on its
+            own. It is where I learned what actually breaks when a pipeline has to run without anyone
+            watching it.
+          </p>
+          <div class="links">
+            <a href="https://github.com/Larmstrong1127/shorts-factory" target="_blank" rel="noopener">Architecture &amp; design decisions</a>
+          </div>
+          <div class="stack-line">Python · Ollama · Gemini · FFmpeg · RealESRGAN · Flask · YouTube Data API</div>
+        </div>
+      </div>
+
+      <div class="project">
         <div class="project-side">2025<br/>Published on Steam</div>
         <div>
           <h3><a href="https://store.steampowered.com/app/4340810/Echoed_Nights/" target="_blank" rel="noopener">Echoed Nights</a></h3>
           <div class="role">Lead developer &amp; director</div>
           <p class="desc">
-            First-person Unity horror game, shipped on Steam with full ownership from concept
-            through QA. NavMesh pathfinding, finite-state-machine enemy AI, and bi-weekly
-            stakeholder deliverables.
+            First-person Unity horror game, shipped on Steam with full ownership from concept through
+            QA — my graduate capstone. NavMesh pathfinding and state-driven enemy AI that patrols,
+            chases, and flees on distance thresholds. Enemy behavior was originally scoped as
+            reinforcement learning and cut when the training budget proved unrealistic; the capstone
+            report keeps that decision on the record rather than quietly reframing it.
           </p>
-          <img class="thumb" src="assets/echoed-nights-shot.png" alt="Echoed Nights gameplay" loading="lazy" />
+          <img class="thumb" src="assets/echoed-nights-shot.jpg" alt="Echoed Nights gameplay — a dark basement room with a checkered tile floor, lit by a single flickering fluorescent tube" width="960" height="540" loading="lazy" decoding="async" />
           <div class="links">
             <a href="https://store.steampowered.com/app/4340810/Echoed_Nights/" target="_blank" rel="noopener">Steam page</a>
-            <a href="https://github.com/Larmstrong1127/Echoed-Nights-Video-Game" target="_blank" rel="noopener">Source</a>
+            <a href="https://github.com/Larmstrong1127/Echoed-Nights-Video-Game" target="_blank" rel="noopener">Capstone report</a>
           </div>
-          <div class="stack-line">Unity · C# · NavMesh · FSM AI</div>
+          <div class="stack-line">Unity 2022.3 · C# · NavMesh · Steamworks.NET</div>
         </div>
       </div>
 
@@ -457,27 +520,21 @@
           <h3><a href="https://github.com/Larmstrong1127/WAVets2Tech" target="_blank" rel="noopener">WAVets2Tech Portal</a></h3>
           <div class="role">Group manager &amp; front-end developer</div>
           <p class="desc">
-            Led a team of four through the full SDLC building a veteran-to-tech career platform
-            for Saint Martin's University — requirements through client delivery.
+            Led a team of four through the full SDLC building a veteran-to-tech career platform for
+            Saint Martin's University — requirements through client delivery. An ASP.NET Core REST API
+            over SQL Server with Entity Framework Core backs a React client for job listings, veteran
+            profiles, and an employer directory.
           </p>
           <div class="links"><a href="https://github.com/Larmstrong1127/WAVets2Tech" target="_blank" rel="noopener">Source</a></div>
-          <div class="stack-line">HTML · CSS · JavaScript</div>
+          <div class="stack-line">C# · ASP.NET Core Web API · Entity Framework Core · SQL Server · React</div>
         </div>
       </div>
-
-      <p class="aside">
-        Not on this list, because it is neither open source nor a product: a personal video-automation
-        system I have been building since June — roughly 105,000 lines of Python across 480 modules and
-        160 test files, with a GPU lock so two render jobs cannot fight over the same card and a
-        scheduler that runs shifts unattended. It is where I learned what actually breaks when a
-        pipeline has to run without anyone watching it.
-      </p>
 
     </section>
 
     <!-- Experience -->
     <section id="experience">
-      <div class="section-head">Experience</div>
+      <h2 class="section-head">Experience</h2>
 
       <div class="job">
         <div class="job-date">2024 – present</div>
@@ -517,20 +574,20 @@
 
     <!-- Skills -->
     <section id="skills">
-      <div class="section-head">Skills</div>
+      <h2 class="section-head">Skills</h2>
       <dl>
         <div class="skill-row"><dt>Languages</dt><dd>Python, JavaScript / TypeScript, C#, SQL, Java</dd></div>
         <div class="skill-row"><dt>ML</dt><dd>PyTorch (hand-written training loops), transformer fine-tuning, Bradley-Terry reward modeling, temperature calibration, eval-harness design, Hugging Face Hub</dd></div>
         <div class="skill-row"><dt>LLM systems</dt><dd>Claude &amp; OpenAI APIs, LangGraph agents, tool calling, SSE streaming, RAG pipelines, ChromaDB, sentence transformers</dd></div>
         <div class="skill-row"><dt>Cloud / infra</dt><dd>AWS (ECS Fargate, S3, DynamoDB, KMS), Terraform, Docker, GitHub Actions CI/CD with OIDC, PostgreSQL, MongoDB Atlas</dd></div>
         <div class="skill-row"><dt>Web</dt><dd>React, Next.js, FastAPI, Node.js / Express, ASP.NET Core, Prisma, REST APIs</dd></div>
-        <div class="skill-row"><dt>Games</dt><dd>Unity 3D, NavMesh, FSM enemy AI, game design</dd></div>
+        <div class="skill-row"><dt>Games</dt><dd>Unity 3D, NavMesh, enemy AI state machines, game design</dd></div>
       </dl>
     </section>
 
     <!-- Education -->
     <section id="education" class="edu">
-      <div class="section-head">Education</div>
+      <h2 class="section-head">Education</h2>
       <p class="degree"><strong>M.S. Computer Science</strong>, Saint Martin's University — May 2024</p>
       <p class="degree"><strong>B.S. Computer Science</strong>, Saint Martin's University — May 2023</p>
       <p style="margin-top:0.6rem">
@@ -541,17 +598,18 @@
 
     <!-- Contact -->
     <section id="contact" class="contact">
-      <div class="section-head">Contact</div>
+      <h2 class="section-head">Contact</h2>
       <p>
-        I'm looking for my first full-time software engineering role — ML infrastructure, backend, or
-        cloud. Happy to walk through any of the projects above in detail, including the parts that
-        didn't work. The fastest way to reach me is email.
+        I'm looking for junior ML infrastructure, backend, or cloud roles — automating LLM evaluation
+        is the problem I most want more of, and it's what I've spent the last year building. Happy to
+        walk through any of the projects above in detail, including the parts that didn't work. The
+        fastest way to reach me is email.
       </p>
       <div class="links">
         <a href="mailto:la.armstrong19@gmail.com">la.armstrong19@gmail.com</a>
         <a href="https://www.linkedin.com/in/landon-armstrong/" target="_blank" rel="noopener">LinkedIn</a>
         <a href="https://github.com/Larmstrong1127" target="_blank" rel="noopener">GitHub</a>
-        <a href="assets/Landon_Armstrong_Resume.pdf" download>Resume (PDF)</a>
+        <a href="assets/Landon_Armstrong_Resume.pdf" target="_blank" rel="noopener">Resume (PDF)</a>
       </div>
     </section>
 
