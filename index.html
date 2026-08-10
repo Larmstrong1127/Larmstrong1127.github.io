@@ -299,8 +299,8 @@
           </p>
           <p>
             I build full-stack products too, and still do: a dental SaaS running in production with
-            Stripe billing and dual-role auth, a healthcare API on AWS provisioned with Terraform, and
-            a horror game that shipped on Steam. I trained in CS through a B.S., an M.S., and a
+            Stripe billing and dual-role auth, a clinical-document API whose AWS infrastructure is
+            written in Terraform, and a horror game that shipped on Steam. I trained in CS through a B.S., an M.S., and a
             graduate teaching assistantship, and I'm building in public while I work outside the field.
             Every number on this page comes out of a results file I can show you — including the ones
             that didn't go my way.
@@ -424,10 +424,14 @@
             A clinical-document API: upload a note, get back a summary, extracted diagnoses, or a risk
             assessment from a LangGraph ReAct agent with four tools over the document store. Document
             text is encrypted at rest with Fernet, every document and analysis request is written to an
-            append-only audit log (DynamoDB in AWS, JSONL locally), and deploys authenticate to AWS over
-            OIDC so no long-lived keys sit in the repo. Infrastructure
-            is four Terraform modules — networking, security, storage, ECS Fargate. 40 pytest tests
-            cover auth, the document service, encryption round-trips, and the audit trail.
+            append-only audit log (DynamoDB when configured for AWS, JSONL locally). Infrastructure is
+            four Terraform modules — networking, security, storage, ECS Fargate — and the deploy
+            pipeline authenticates over OIDC so no long-lived keys sit in the repo. To be exact about
+            what that means: I wrote the infrastructure and the pipeline, but I have never run them
+            against a live AWS account. The CD workflow has no successful run, and I exercised the
+            S3, DynamoDB and KMS paths against LocalStack rather than pay for a Fargate cluster to sit
+            idle behind a portfolio project. 40 pytest tests cover auth, the document service,
+            encryption round-trips, and the audit trail.
           </p>
           <div class="links"><a href="https://github.com/Larmstrong1127/medinsight-api" target="_blank" rel="noopener">Source</a></div>
           <div class="stack-line">Python · FastAPI · LangGraph · AWS ECS · Terraform · DynamoDB · Docker</div>
@@ -585,7 +589,7 @@
         <div class="skill-row"><dt>Languages</dt><dd>Python, JavaScript / TypeScript, C#, SQL, Java</dd></div>
         <div class="skill-row"><dt>ML</dt><dd>PyTorch (hand-written training loops), transformer fine-tuning, Bradley-Terry reward modeling, temperature calibration, eval-harness design, Hugging Face Hub</dd></div>
         <div class="skill-row"><dt>LLM systems</dt><dd>Claude &amp; OpenAI APIs, LangGraph agents, tool calling, SSE streaming, RAG pipelines, ChromaDB, sentence transformers</dd></div>
-        <div class="skill-row"><dt>Cloud / infra</dt><dd>AWS (ECS Fargate, S3, DynamoDB, KMS), Terraform, Docker, GitHub Actions CI/CD with OIDC, PostgreSQL, MongoDB Atlas</dd></div>
+        <div class="skill-row"><dt>Cloud / infra</dt><dd>Terraform, Docker, GitHub Actions CI/CD with OIDC, PostgreSQL, MongoDB Atlas, Vercel, Render. AWS (ECS Fargate, S3, DynamoDB, KMS) written in Terraform and exercised against LocalStack — not run against a live account</dd></div>
         <div class="skill-row"><dt>Web</dt><dd>React, Next.js, FastAPI, Node.js / Express, ASP.NET Core, Prisma, REST APIs</dd></div>
         <div class="skill-row"><dt>Games</dt><dd>Unity 3D, NavMesh, enemy AI state machines, game design</dd></div>
       </dl>
