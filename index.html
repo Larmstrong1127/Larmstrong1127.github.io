@@ -299,11 +299,12 @@
           </p>
           <p>
             I build full-stack products too, and still do: a deployed dental SaaS with dual-role auth
-            and a Stripe subscription integration, a clinical-document API whose AWS infrastructure is
+            and a Stripe subscription integration that is wired end to end but has never processed a
+            live payment, a clinical-document API whose AWS infrastructure is
             written in Terraform, and a horror game that shipped on Steam. I trained in CS through a B.S., an M.S., and a
             graduate teaching assistantship, and I'm building in public while I work outside the field.
-            Every number on this page comes out of a results file I can show you — including the ones
-            that didn't go my way.
+            Every number on this page comes out of a committed results file or model card I can show
+            you — including the ones that didn't go my way.
           </p>
           <p class="meta">
             <a href="https://github.com/Larmstrong1127">GitHub</a> ·
@@ -510,8 +511,11 @@
           <div class="role">Lead developer &amp; director</div>
           <p class="desc">
             First-person Unity horror game, shipped on Steam with full ownership from concept through
-            QA — my graduate capstone. NavMesh pathfinding and state-driven enemy AI that patrols,
-            chases, and flees on distance thresholds. Enemy behavior was originally scoped as
+            QA — my graduate capstone. Enemy AI is two coroutines over Unity's NavMesh — wander to
+            random reachable points, chase past one distance threshold, back away inside a closer one.
+            The four-state patrol/alert/chase/search machine my capstone report specifies is commented
+            out in <span class="code">Monster.cs</span>; it was cut to ship, and the repo says so.
+            Enemy behavior was originally scoped as
             reinforcement learning and cut when the training budget proved unrealistic; the capstone
             report keeps that decision on the record rather than quietly reframing it.
           </p>
@@ -525,15 +529,17 @@
       </div>
 
       <div class="project">
-        <div class="project-side">2024<br/>Team lead</div>
+        <div class="project-side">2023<br/>Team lead</div>
         <div>
           <h3><a href="https://github.com/Larmstrong1127/WAVets2Tech" target="_blank" rel="noopener">WAVets2Tech Portal</a></h3>
           <div class="role">Group manager &amp; front-end developer</div>
           <p class="desc">
             Led a team of four through the full SDLC building a veteran-to-tech career platform for
             Saint Martin's University — requirements through client delivery. An ASP.NET Core REST API
-            over SQL Server with Entity Framework Core backs a React client for job listings, veteran
-            profiles, and an employer directory.
+            over SQL Server with Entity Framework Core, with a React client hosted inside the same
+            project, covering job listings, veteran profiles, and an employer directory. The weight of
+            the code is the C# side — six controllers and seventeen EF Core models; the React layer is
+            a single-page client, not a large front end.
           </p>
           <div class="links"><a href="https://github.com/Larmstrong1127/WAVets2Tech" target="_blank" rel="noopener">Source</a></div>
           <div class="stack-line">C# · ASP.NET Core Web API · Entity Framework Core · SQL Server · React</div>
@@ -586,12 +592,12 @@
     <section id="skills">
       <h2 class="section-head">Skills</h2>
       <dl>
-        <div class="skill-row"><dt>Languages</dt><dd>Python, JavaScript / TypeScript, C#, SQL, Java</dd></div>
+        <div class="skill-row"><dt>Languages</dt><dd>Python, JavaScript / TypeScript, C#, SQL, R</dd></div>
         <div class="skill-row"><dt>ML</dt><dd>PyTorch (hand-written training loops), transformer fine-tuning, Bradley-Terry reward modeling, temperature calibration, eval-harness design, Hugging Face Hub</dd></div>
         <div class="skill-row"><dt>LLM systems</dt><dd>Claude &amp; OpenAI APIs, LangGraph agents, tool calling, SSE streaming, RAG pipelines, ChromaDB, sentence transformers</dd></div>
         <div class="skill-row"><dt>Cloud / infra</dt><dd>Terraform, Docker, GitHub Actions CI/CD with OIDC, PostgreSQL, MongoDB Atlas, Vercel, Render. AWS (ECS Fargate, S3, DynamoDB, KMS) written in Terraform and exercised against LocalStack — not run against a live account</dd></div>
         <div class="skill-row"><dt>Web</dt><dd>React, Next.js, FastAPI, Node.js / Express, ASP.NET Core, Prisma, REST APIs</dd></div>
-        <div class="skill-row"><dt>Games</dt><dd>Unity 3D, NavMesh, enemy AI state machines, game design</dd></div>
+        <div class="skill-row"><dt>Games</dt><dd>Unity 3D, NavMesh agents, coroutine-driven enemy behaviour, Steamworks.NET release, game design</dd></div>
       </dl>
     </section>
 
