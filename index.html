@@ -429,12 +429,16 @@
             relationships. Run against 1,943 real files from my own pipeline, it registered 1,791 assets
             and 934 derivations in 110 seconds — and found that 0 of them had a recoverable model,
             because generation parameters were never persisted per file. It records that as null rather
-            than guessing. The companion project,
+            than guessing. It also reads embedded C2PA manifests — a scan of the same corpus found only
+            50 of 1,791 assets carry one, all from the pipeline's two publish paths — and ships an
+            artist-facing browser: a thumbnail grid with provenance filters and a clickable lineage
+            graph, plus an <span class="code">apr demo</span> command that takes a reviewer from install
+            to a working lineage view in under two minutes. The companion project,
             <a href="https://github.com/Larmstrong1127/comfy-workflow-pack" target="_blank" rel="noopener">comfy-workflow-pack</a>,
             closes the loop from the other end: it packages a ComfyUI graph as a versioned pack with a
             validated artist-safe parameter surface, and was executed end-to-end against ComfyUI 0.32 —
             the rendered output registered into this registry and confirmed in a re-opened USD stage.
-            69 + 118 tests between the two.
+            134 + 118 tests between the two.
           </p>
           <div class="links">
             <a href="https://github.com/Larmstrong1127/asset-provenance" target="_blank" rel="noopener">Registry source</a>
