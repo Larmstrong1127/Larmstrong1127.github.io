@@ -392,6 +392,14 @@
               that mine is the better reward model. The last row is the inverse: on fifteen genuine
               blind votes of my own it drops to chance. Neither model generalizes for free.
             </p>
+            <p class="table-note">
+              I then measured that boundary on someone else's benchmark: run through the official
+              RewardBench 2 harness (1,865 prompts, best-of-4, 25% random floor), my model averages
+              <span class="code">25.3</span> — the floor — against 32.0 for the official 435M baseline,
+              with one bright spot (Math, 47.1 vs 50.3 at 40% of the size). Both numbers are on the
+              model card with full protocol. The in-distribution win and the out-of-distribution floor
+              are both true; publishing the pair is what makes the first one worth believing.
+            </p>
           </div>
           <p>
             A later self-audit caught the kind of bug that never throws: the reward judge was serving
