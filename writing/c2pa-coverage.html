@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="I scanned 1,791 AI-generated files from my own media pipeline for C2PA Content Credentials. 50 of them had a manifest. That number is a statement about where provenance gets attached, not about C2PA." />
+  <title>I measured C2PA coverage on 1,791 AI-generated assets — Landon Armstrong</title>
+  <link rel="canonical" href="https://larmstrong1127.github.io/writing/c2pa-coverage.html" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231d4ed8'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='17' fill='%23ffffff' text-anchor='middle'%3ELA%3C/text%3E%3C/svg%3E" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://larmstrong1127.github.io/writing/c2pa-coverage.html" />
+  <meta property="og:title" content="I measured C2PA coverage on 1,791 AI-generated assets. It was 2.8%." />
+  <meta property="og:description" content="A content-addressed provenance registry run against a real generation pipeline: 0 assets with a recoverable model, 50 with a C2PA manifest, and one poster frame that was the exact bytes of six others." />
+  <meta property="og:image" content="https://larmstrong1127.github.io/assets/profile.jpg" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paper:      #faf8f4;
+      --ink:        #1c1b18;
+      --ink-soft:   #57534a;
+      --ink-faint:  #767162;
+      --rule:       #e2ddd3;
+      --accent:     #1d4ed8;
+      --card:       #ffffff;
+      --mono:       'IBM Plex Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.65;
+      font-size: 16px;
+    }
+
+    a { color: inherit; }
+    img, svg { max-width: 100%; display: block; }
+
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+
+    h1, h2, h3, .serif {
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    header {
+      padding: 1.4rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .header-inner {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+    .site-name { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; text-decoration: none; }
+    nav.top a {
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+      margin-left: 1.4rem;
+    }
+    nav.top a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+    article { padding: 3.25rem 0 1rem; }
+    .kicker {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+    article h1 {
+      font-size: clamp(1.9rem, 4.6vw, 2.6rem);
+      line-height: 1.16;
+      max-width: 720px;
+      margin-bottom: 0.9rem;
+    }
+    .byline {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--ink-faint);
+      padding-bottom: 1.6rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 2rem;
+    }
+
+    article p { max-width: 680px; margin-bottom: 1.05rem; color: var(--ink-soft); }
+    article p strong { color: var(--ink); font-weight: 600; }
+    article h2 {
+      font-size: 1.42rem;
+      margin: 2.4rem 0 0.85rem;
+      color: var(--ink);
+    }
+    article ul { max-width: 680px; padding-left: 1.15rem; color: var(--ink-soft); margin-bottom: 1.05rem; }
+    article li + li { margin-top: 0.35rem; }
+    .code { font-family: var(--mono); font-size: 0.92em; }
+    article a[href] { color: var(--accent); text-decoration: none; }
+    article a[href]:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    pre {
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--ink-soft);
+      margin: 0 0 1.15rem;
+      max-width: 680px;
+    }
+
+    figure {
+      border: 1px solid var(--rule);
+      background: var(--card);
+      border-radius: 6px;
+      padding: 1.25rem 1.35rem 1.1rem;
+      margin: 1.6rem 0 1.5rem;
+      max-width: 680px;
+    }
+    figcaption {
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+      line-height: 1.55;
+      margin-top: 0.9rem;
+    }
+    .fig-title {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+      margin-bottom: 0.9rem;
+    }
+
+    .links {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      font-size: 0.88rem;
+    }
+    .links a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    .endnote {
+      border-top: 1px solid var(--rule);
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      padding-bottom: 2rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.5rem 0 2.5rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--ink-faint);
+    }
+
+    @media (max-width: 640px) {
+      nav.top a { margin-left: 0; margin-right: 1.2rem; }
+      article { padding-top: 2.25rem; }
+      pre { font-size: 0.72rem; }
+      figure { padding: 1rem 1rem 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="wrap header-inner">
+      <a class="site-name" href="../index.html">Landon Armstrong</a>
+      <nav class="top" aria-label="Primary">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#writing">Writing</a>
+        <a href="../index.html#experience">Experience</a>
+        <a href="../assets/Landon_Armstrong_Resume.pdf" target="_blank" rel="noopener">Resume</a>
+        <a href="../index.html#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <article>
+      <div class="kicker">Writing · Measurement</div>
+      <h1>I measured C2PA coverage on 1,791 AI-generated assets. It was 2.8% — and that's not a C2PA failure.</h1>
+      <div class="byline">August 2026 · Landon Armstrong · ~1,100 words</div>
+
+      <p>
+        I have a media pipeline on my own machine that generates images and video with diffusion
+        models. Last week I tried to answer a question about one of its outputs that I assumed was
+        easy: what made this file? Not roughly — exactly. Which model, which seed, which prompt,
+        which earlier file it came out of. I could not answer it for that file, and when I built a
+        tool to check, it turned out I could not answer it for almost any of them. This is what the
+        measurement looked like, and why I think the interesting number is not the one I expected.
+      </p>
+
+      <h2>The experiment</h2>
+      <p>
+        I wrote a content-addressed provenance registry. Every asset is identified by the SHA-256 of
+        its bytes rather than by its path, generation metadata is recorded against that hash,
+        derivations form a cycle-checked DAG, and the graph exports to an OpenUSD stage. Then I
+        pointed it at the pipeline's actual output directory, read-only, and let it walk everything.
+      </p>
+      <pre>files scanned        1943
+assets registered    1791
+duplicate bytes      152
+derivations recorded 934
+bytes hashed         13.9 GB
+errors               0
+wall clock           110.0s</pre>
+      <p>
+        One command, 110 seconds, 13.9 GB, no errors. That corpus is the whole experiment: real
+        files from a pipeline I actually run, not a synthetic fixture built to make a point.
+      </p>
+
+      <h2>Finding one: the pipeline cannot say what made its own output</h2>
+      <p>
+        Of 1,791 registered assets, <strong>0 had a recoverable model</strong>. 60 had a seed. 48 had
+        a prompt. 61 had a measured generation time. That is not a bug in the registry — the registry
+        recorded exactly what was on disk. The model name, step count and guidance scale for a given
+        frame exist only in the config object loaded at render time. Nothing writes them next to the
+        file, so once the process exits they are gone.
+      </p>
+      <p>
+        The registry stores that as <span class="code">NULL</span> and tags every asset with a
+        <span class="code">metadata_source</span> field saying where its metadata came from, including
+        the honest labels: <span class="code">convention:</span> for lineage I inferred from filename
+        pairing, <span class="code">path:</span> for media with no metadata on disk at all. Refusing
+        to guess a plausible model name is the whole point. An invented provenance record is worse
+        than a blank one.
+      </p>
+
+      <h2>Finding two: 50 of 1,791 files carry a C2PA manifest</h2>
+      <p>
+        The pipeline embeds <a href="https://c2pa.org" target="_blank" rel="noopener">C2PA</a> Content
+        Credentials, so I wrote a stdlib reader for the three containers involved — JPEG APP11
+        segments, the PNG <span class="code">caBX</span> chunk, and the ISO-BMFF top-level
+        <span class="code">uuid</span> box — and re-read all 1,791 files off disk.
+      </p>
+      <pre>files scanned    1791
+with a manifest  50
+unreadable       0
+file missing     0
+wall clock       92.2s
+
+claim generators:
+      50  shorts-factory 1.0.0</pre>
+      <p>
+        <strong>50 of 1,791 — 2.8%.</strong> 36 stills, 14 clips, one claim generator, zero parse
+        errors. Every manifest that existed was well-formed. And every one of the 50 came from
+        exactly two of the pipeline's output paths: the two that produce posting masters. Nothing
+        else in the pipeline embeds anything, because nothing else in the pipeline publishes.
+      </p>
+      <p>
+        All 50 carry a claim-signature box. I want to be precise about what I did not do: I did not
+        validate a single one. No COSE check, no certificate chain, no trust list, no hard-binding
+        comparison. The registry stores <span class="code">c2pa_signature_validated</span> as
+        <span class="code">NULL</span> for every row and the USD export writes
+        <span class="code">not-attempted</span>, because a column that could be misread as "verified"
+        is a liability. A manifest is a claim. An unvalidated claim is evidence of intent, not of
+        truth.
+      </p>
+
+      <h2>Finding three: content addressing sees things paths cannot</h2>
+      <p>
+        152 files were byte-identical to something already registered, and 56 assets turned out to
+        have more than one parent. The memorable one: a single review poster frame was the exact same
+        bytes as the poster for six other videos.
+      </p>
+      <pre>$ apr show 00ed4b0fe4d4
+derived from
+  1e3e0bdc6cd9  [thumbnail:poster-frame]
+  75c1d850eb9b  [thumbnail:poster-frame]
+  ... (7 total)</pre>
+      <p>
+        Seven different videos, one identical thumbnail. Path-based tracking sees seven separate
+        files and notices nothing at all. Content addressing collapses them into one asset with seven
+        parents, and the anomaly becomes visible for free — I did not go looking for it.
+      </p>
+
+      <h2>Why 2.8% is the right number for C2PA to produce</h2>
+      <p>
+        The easy read of "2.8%" is that C2PA has an adoption problem. I don't think that's what this
+        measures. C2PA is a standard for asserting provenance on content that <em>ships</em>. It is
+        attached at export, by the step that publishes, and on this corpus it did that job with a
+        100% success rate on the files it was wired into. The 1,741 files without a manifest were
+        never published. Nothing in the standard promised to cover them.
+      </p>
+
+      <figure>
+        <div class="fig-title">Coverage on 1,791 assets — two mechanisms, two blind spots</div>
+        <svg viewBox="0 0 620 168" role="img" aria-label="Two horizontal bars over 1,791 assets. C2PA manifests cover 50 assets, 2.8 percent, at the publish end. Recoverable generation parameters cover 60 assets, 3.4 percent, at the generation end. The remaining assets are covered by neither.">
+          <text x="0" y="14" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#767162">C2PA manifest (attached at publish)</text>
+          <rect x="0" y="22" width="620" height="22" fill="#eceae4" stroke="#e2ddd3" />
+          <rect x="0" y="22" width="17" height="22" fill="#1d4ed8" />
+          <text x="27" y="37" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#1c1b18">50 of 1,791 &#183; 2.8%</text>
+
+          <text x="0" y="76" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#767162">Recoverable generation parameters (seed on disk)</text>
+          <rect x="0" y="84" width="620" height="22" fill="#eceae4" stroke="#e2ddd3" />
+          <rect x="0" y="84" width="21" height="22" fill="#1c1b18" />
+          <text x="31" y="99" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#1c1b18">60 of 1,791 &#183; 3.4% &#183; model: 0</text>
+
+          <line x1="0" y1="126" x2="620" y2="126" stroke="#e2ddd3" />
+          <text x="0" y="146" font-family="'IBM Plex Mono',monospace" font-size="11" fill="#767162">Covered by neither: the intermediates &#8212; raw clips, frames, thumbnails, branding</text>
+        </svg>
+        <figcaption>
+          The two bars do not stack. C2PA marks the files at the end of the pipeline; the registry's
+          generation metadata describes files at the start. Neither mechanism was ever going to cover
+          the middle, which is most of the corpus.
+        </figcaption>
+      </figure>
+
+      <p>
+        So the two mechanisms cover disjoint ground. C2PA tracks <strong>what shipped</strong>. An
+        internal content-addressed registry tracks <strong>what was made</strong>. The 50 files that
+        can vouch for themselves are the ones already published; for the other 1,741, an external
+        registry keyed on content hash is the only record that exists. Neither makes the other
+        redundant, and both together still leave the intermediates dark — the raw clip that got
+        upscaled, the frame that became a thumbnail, the plate that six variants branched from.
+        That gap is not owned by anybody. It is not a standards problem; it is a plumbing problem,
+        and it lives inside each pipeline.
+      </p>
+
+      <h2>What I'd actually do about it</h2>
+      <p>
+        Capture at generation time, not at export time. The moment a sampler node runs is the only
+        moment the model hash, seed, scheduler and prompt all exist in one place; every later step is
+        archaeology. My companion project,
+        <a href="https://github.com/Larmstrong1127/comfy-workflow-pack" target="_blank" rel="noopener">comfy-workflow-pack</a>,
+        emits a provenance record at parameter-bind time for exactly that reason, and the resulting
+        render lands in this registry with a real model and a real seed instead of two nulls.
+      </p>
+
+      <h2>Limitations, stated plainly</h2>
+      <p>
+        This is n=1. One pipeline, mine, at personal scale, with its own idiosyncratic habits about
+        where it writes metadata — a studio running ComfyUI with PNG metadata intact would measure
+        very differently, and probably much better. I read C2PA manifests, I never validated a
+        signature, so nothing here says anything about whether those 50 claims are trustworthy. Only
+        JPEG, PNG and ISO-BMFF containers are parsed; a manifest in a WebP or a sidecar manifest store
+        would have been missed and counted as absent. And the lineage in some parts of the corpus was
+        inferred from filename conventions rather than recorded, which the registry labels but which
+        is still an inference.
+      </p>
+      <p>
+        The numbers above are the ones I got. If you run something similar on a real pipeline and get
+        a different shape, I would genuinely like to see it — and if you think the disjointness
+        argument is wrong, the whole scan methodology is written up in the repo so you can attack the
+        specific step you think is bad.
+      </p>
+
+      <div class="endnote">
+        <div class="links">
+          <a href="https://github.com/Larmstrong1127/asset-provenance" target="_blank" rel="noopener">Registry source</a>
+          <a href="https://github.com/Larmstrong1127/asset-provenance#the-scan-run-against-the-real-corpus" target="_blank" rel="noopener">Raw scan methodology</a>
+          <a href="https://github.com/Larmstrong1127/asset-provenance#the-ingest-run-real-numbers" target="_blank" rel="noopener">The ingest run</a>
+          <a href="mailto:la.armstrong19@gmail.com">Poke holes &#8594; email me</a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <footer>
+    <div class="wrap">© <span id="y"></span> Landon Armstrong · Issaquah, WA · <a href="../index.html" style="color:inherit">Home</a></div>
+  </footer>
+
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
