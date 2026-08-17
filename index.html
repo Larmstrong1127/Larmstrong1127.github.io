@@ -407,9 +407,10 @@
             being scored off-regime. The sequence length is now derived from the checkpoint's own
             config instead of restated in three files. The published numbers survived the re-measurement
             — the defect was in serving, not in reporting — but an unmeasured difference is not a small
-            one. CI now runs a fixed suite against a pinned local model on every pull request that
-            touches the API, and fails the build if scores collapse: the platform gates itself with
-            itself.
+            one. An eval-regression gate is committed as a CI workflow — a fixed suite against a
+            pinned local model, failing the build if scores collapse, the platform gating itself with
+            itself. It is wired to <span class="code">pull_request</span> and has not yet fired:
+            this repo's history is direct-to-master, so it has zero runs.
           </p>
           <div class="links">
             <a href="https://github.com/Larmstrong1127/evalforge" target="_blank" rel="noopener">Source</a>
@@ -447,7 +448,7 @@
             closes the loop from the other end: it packages a ComfyUI graph as a versioned pack with a
             validated artist-safe parameter surface, and was executed end-to-end against ComfyUI 0.32 —
             the rendered output registered into this registry and confirmed in a re-opened USD stage.
-            134 + 118 tests between the two.
+            144 + 118 tests between the two.
           </p>
           <div class="links">
             <a href="https://github.com/Larmstrong1127/asset-provenance" target="_blank" rel="noopener">Registry source</a>
@@ -552,10 +553,11 @@
           <div class="role">Lead developer &amp; director</div>
           <p class="desc">
             First-person Unity horror game, shipped on Steam with full ownership from concept through
-            QA — my graduate capstone. Enemy AI is two coroutines over Unity's NavMesh — wander to
-            random reachable points, chase past one distance threshold, back away inside a closer one.
-            The four-state patrol/alert/chase/search machine my capstone report specifies is commented
-            out in <span class="code">Monster.cs</span>; it was cut to ship, and the repo says so.
+            QA — my graduate capstone. Enemy AI in the release build runs on Unity's NavMesh as a
+            hand-placed waypoint patrol that commits to a chase once you are inside a 20-unit radius.
+            A coroutine rewrite with random-point wander and a back-away-when-crowded branch is in
+            <span class="code">Monster.cs</span> but commented out — it never made the build, and I
+            had described it here as though it had until I re-read the file.
             Enemy behavior was originally scoped as
             reinforcement learning and cut when the training budget proved unrealistic; the capstone
             report keeps that decision on the record rather than quietly reframing it.
