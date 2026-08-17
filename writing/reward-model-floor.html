@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="I trained a 184M Bradley-Terry reward model that beats a 435M public baseline in-distribution, 0.7026 to 0.6009. On RewardBench 2 it scores 25.3 — the random floor. Publishing both is what makes the first number believable." />
+  <title>My reward model beats a model 2.4x its size. It also scores at the random floor. — Landon Armstrong</title>
+  <link rel="canonical" href="https://larmstrong1127.github.io/writing/reward-model-floor.html" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231d4ed8'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='17' fill='%23ffffff' text-anchor='middle'%3ELA%3C/text%3E%3C/svg%3E" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://larmstrong1127.github.io/writing/reward-model-floor.html" />
+  <meta property="og:title" content="My reward model beats a model 2.4x its size. It also scores at the random floor." />
+  <meta property="og:description" content="A 184M Bradley-Terry preference model at 0.7026 in-distribution against a 435M baseline at 0.6009 — and 25.3 on RewardBench 2, which is chance. The pair is the result." />
+  <meta property="og:image" content="https://larmstrong1127.github.io/assets/profile.jpg" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paper:      #faf8f4;
+      --ink:        #1c1b18;
+      --ink-soft:   #57534a;
+      --ink-faint:  #767162;
+      --rule:       #e2ddd3;
+      --accent:     #1d4ed8;
+      --card:       #ffffff;
+      --track:      #eceae4;
+      --mono:       'IBM Plex Mono', ui-monospace, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper:      #14140f;
+        --ink:        #f2efe7;
+        --ink-soft:   #c3bdaf;
+        --ink-faint:  #948d7d;
+        --rule:       #35322b;
+        --accent:     #93b4ff;
+        --card:       #1c1c16;
+        --track:      #2a2822;
+      }
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.65;
+      font-size: 16px;
+    }
+
+    a { color: inherit; }
+    img, svg { max-width: 100%; display: block; }
+
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+
+    h1, h2, h3, .serif {
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    header {
+      padding: 1.4rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .header-inner {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+    .site-name { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; text-decoration: none; }
+    nav.top a {
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+      margin-left: 1.4rem;
+    }
+    nav.top a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+    article { padding: 3.25rem 0 1rem; }
+    .kicker {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+    article h1 {
+      font-size: clamp(1.9rem, 4.6vw, 2.6rem);
+      line-height: 1.16;
+      max-width: 720px;
+      margin-bottom: 0.9rem;
+    }
+    .byline {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--ink-faint);
+      padding-bottom: 1.6rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 2rem;
+    }
+
+    article p { max-width: 680px; margin-bottom: 1.05rem; color: var(--ink-soft); }
+    article p strong { color: var(--ink); font-weight: 600; }
+    article h2 {
+      font-size: 1.42rem;
+      margin: 2.4rem 0 0.85rem;
+      color: var(--ink);
+    }
+    article ul { max-width: 680px; padding-left: 1.15rem; color: var(--ink-soft); margin-bottom: 1.05rem; }
+    article li + li { margin-top: 0.35rem; }
+    .code { font-family: var(--mono); font-size: 0.92em; }
+    article a[href] { color: var(--accent); text-decoration: none; }
+    article a[href]:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    pre {
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--ink-soft);
+      margin: 0 0 1.15rem;
+      max-width: 680px;
+    }
+
+    figure {
+      border: 1px solid var(--rule);
+      background: var(--card);
+      border-radius: 6px;
+      padding: 1.25rem 1.35rem 1.1rem;
+      margin: 1.6rem 0 1.5rem;
+      max-width: 680px;
+    }
+    figcaption {
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+      line-height: 1.55;
+      margin-top: 0.9rem;
+    }
+    .fig-title {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+      margin-bottom: 0.9rem;
+    }
+
+    .links {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      font-size: 0.88rem;
+    }
+    .links a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    .endnote {
+      border-top: 1px solid var(--rule);
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      padding-bottom: 2rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.5rem 0 2.5rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--ink-faint);
+    }
+
+    @media (max-width: 640px) {
+      nav.top a { margin-left: 0; margin-right: 1.2rem; }
+      article { padding-top: 2.25rem; }
+      pre { font-size: 0.72rem; }
+      figure { padding: 1rem 1rem 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="wrap header-inner">
+      <a class="site-name" href="../index.html">Landon Armstrong</a>
+      <nav class="top" aria-label="Primary">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#writing">Writing</a>
+        <a href="../index.html#experience">Experience</a>
+        <a href="../assets/Landon_Armstrong_Resume.pdf" target="_blank" rel="noopener">Resume</a>
+        <a href="../index.html#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <article>
+      <div class="kicker">Writing · Measurement</div>
+      <h1>My reward model beats a model 2.4&#215; its size. It also scores at the random floor.</h1>
+      <div class="byline">August 2026 · Landon Armstrong · ~1,200 words</div>
+
+      <p>
+        I trained a preference reward model for
+        <a href="https://github.com/Larmstrong1127/evalforge" target="_blank" rel="noopener">EvalForge</a>,
+        my LLM evaluation platform, because I wanted a judge that could rank two answers without a
+        golden answer to check against. It came out of the run with a number I liked: <strong>0.7026
+        pairwise accuracy</strong>, against <strong>0.6009</strong> for a well-known public reward
+        model with 2.4&#215; the parameters, on the same split through the same harness. That is the
+        number I would have led with a year ago. This piece is about why I no longer think it means
+        anything on its own, and what I had to publish next to it before it did.
+      </p>
+
+      <h2>What the model is</h2>
+      <p>
+        <span class="code">microsoft/deberta-v3-base</span> — 184M parameters — with a one-dimensional
+        regression head, trained with a hand-written Bradley-Terry loop rather than a library trainer,
+        so the objective is exactly one line and I can unit-test it against hand-computed values:
+      </p>
+      <pre>L = -log sigmoid(r_chosen - r_rejected)</pre>
+      <p>
+        One epoch on UltraFeedback <span class="code">train_prefs</span> (60,700 pairs) at a 512-token
+        budget. Raw Bradley-Terry logits are arbitrarily scaled, so afterwards I fit a single scalar
+        temperature on the held-out split by minimising the NLL of
+        <span class="code">sigmoid(margin / T)</span>, landing at <strong>T = 1.1668</strong> and
+        storing it in the checkpoint config alongside the sequence budget it was fit under.
+      </p>
+      <p>
+        That last detail matters more than it sounds. T was fit on <em>margins</em>, so the thing it
+        calibrates is the probability that A is preferred to B for the same prompt — not the quality
+        of a single answer. Bradley-Terry only ever sees the difference between two rewards, which
+        means the objective is invariant to adding a constant to every score. The zero point is
+        arbitrary. A single reward is not a 0-1 quality score, and no temperature makes it one.
+      </p>
+
+      <h2>The flattering number</h2>
+      <p>
+        On UltraFeedback <span class="code">test_prefs</span> (N = 1,987 after a truncation audit),
+        this model gets 0.7026. The public baseline,
+        <span class="code">OpenAssistant/reward-model-deberta-v3-large-v2</span> at 435M, gets 0.6009
+        on the identical split through the identical evaluation function. Chance is 0.5000, and a
+        failed run from my own learning-rate sweep sat at 0.5098, so I know what a collapsed model
+        looks like on this harness. 0.7026 is real signal, not a collapsed number dressed up.
+      </p>
+      <p>
+        It is also not a claim that mine is the better reward model, and I want to say why in the
+        specific rather than as a disclaimer. <strong>The comparison is in-distribution for me and
+        out-of-distribution for them.</strong> I trained on UltraFeedback and I am testing on
+        UltraFeedback: same annotator (an LLM), same prompt mix, same conventions about how much
+        elaboration counts as good. The OpenAssistant model was fit on a completely different
+        preference mixture — WebGPT, summarize-from-feedback, synthetic-instruct, Anthropic HH — so
+        UltraFeedback is a distribution shift for it and not for me. A ten-point win under those
+        conditions is what you would expect from home-field advantage alone.
+      </p>
+
+      <h2>The number that makes the first one believable</h2>
+      <p>
+        So I ran the official RewardBench 2 harness — <span class="code">allenai/reward-bench</span> at
+        commit <span class="code">05a9005</span>, dataset at <span class="code">7ff0885</span>, 1,865
+        prompts, best-of-4, scripts unmodified — on CPU, 1h18m, on 2026-08-13. Best-of-4 means the
+        random baseline is 25% for the five accuracy domains.
+      </p>
+      <p>
+        My unweighted six-domain average was <strong>25.3</strong>.
+      </p>
+
+      <figure>
+        <div class="fig-title">RewardBench 2, 2026-08-13 — per-domain vs. the 25% random floor</div>
+        <svg viewBox="0 0 620 262" role="img" aria-label="Horizontal bar chart of RewardBench 2 domain scores against a 25 percent random floor. Factuality 28.8, Focus 15.8, Math 47.1, Precise IF 23.1, Safety 35.8, and Ties 1.4 on a different metric. The unweighted six-domain average is 25.3, essentially level with the floor.">
+          <g font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--ink-faint)">
+            <text x="96" y="10" text-anchor="middle">0</text>
+            <text x="306" y="10" text-anchor="middle">25</text>
+            <text x="516" y="10" text-anchor="middle">50</text>
+          </g>
+
+          <line x1="306" y1="16" x2="306" y2="176" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3" />
+          <text x="310" y="192" font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--accent)">random floor = 25 (best-of-4)</text>
+
+          <g font-family="'IBM Plex Mono',monospace" font-size="11">
+            <text x="3" y="32" fill="var(--ink-faint)">Factuality</text>
+            <rect x="96" y="22" width="504" height="14" fill="var(--track)" />
+            <rect x="96" y="22" width="242" height="14" fill="var(--ink)" />
+            <text x="346" y="32" fill="var(--ink)">28.8</text>
+
+            <text x="3" y="58" fill="var(--ink-faint)">Focus</text>
+            <rect x="96" y="48" width="504" height="14" fill="var(--track)" />
+            <rect x="96" y="48" width="133" height="14" fill="var(--ink)" />
+            <text x="237" y="58" fill="var(--ink)">15.8</text>
+
+            <text x="3" y="84" fill="var(--ink-faint)">Math</text>
+            <rect x="96" y="74" width="504" height="14" fill="var(--track)" />
+            <rect x="96" y="74" width="396" height="14" fill="var(--accent)" />
+            <text x="500" y="84" fill="var(--ink)">47.1</text>
+
+            <text x="3" y="110" fill="var(--ink-faint)">Precise IF</text>
+            <rect x="96" y="100" width="504" height="14" fill="var(--track)" />
+            <rect x="96" y="100" width="194" height="14" fill="var(--ink)" />
+            <text x="298" y="110" fill="var(--ink)">23.1</text>
+
+            <text x="3" y="136" fill="var(--ink-faint)">Safety</text>
+            <rect x="96" y="126" width="504" height="14" fill="var(--track)" />
+            <rect x="96" y="126" width="301" height="14" fill="var(--ink)" />
+            <text x="405" y="136" fill="var(--ink)">35.8</text>
+
+            <text x="3" y="162" fill="var(--ink-faint)">Ties *</text>
+            <rect x="96" y="152" width="504" height="14" fill="var(--track)" />
+            <rect x="96" y="152" width="12" height="14" fill="var(--ink-faint)" />
+            <text x="116" y="162" fill="var(--ink-faint)">1.4 &#183; different metric, chance is not 25</text>
+          </g>
+
+          <line x1="0" y1="208" x2="620" y2="208" stroke="var(--rule)" />
+          <g font-family="'IBM Plex Mono',monospace" font-size="11">
+            <text x="3" y="230" fill="var(--ink-faint)">Average</text>
+            <rect x="96" y="220" width="504" height="14" fill="var(--track)" />
+            <rect x="96" y="220" width="213" height="14" fill="var(--ink)" />
+            <text x="317" y="230" fill="var(--ink)">25.3</text>
+            <text x="3" y="254" fill="var(--ink-faint)">For scale: OpenAssistant 435M = 32.0 &#183; best listed seq. classifier = 84.1</text>
+          </g>
+        </svg>
+        <figcaption>
+          * The Ties domain uses a margin-based metric whose chance level sits well below 25%, so the
+          dashed line does not apply to that row and 1.4 should not be read against it. Every other
+          row is best-of-4 accuracy. The average bar lands on the dashed line, which is the finding.
+        </figcaption>
+      </figure>
+
+      <p>
+        25.3 <em>is</em> the floor. Out of distribution, this model is guessing. The 435M
+        OpenAssistant model — the one I beat by ten points in-distribution — officially scores 32.0
+        here, and the strongest sequence classifier on the leaderboard scores 84.1. So the ordering
+        flips completely the moment we leave my training distribution, and the gap to the actual
+        state of the art is roughly sixty points.
+      </p>
+      <p>
+        One domain survives: <strong>Math at 47.1</strong>, against the 435M baseline's 50.3 — within
+        three points at 40% of the parameters. That is the only place I would defend this model in
+        public, and I only know it because I ran the benchmark that embarrassed the other five rows.
+      </p>
+
+      <h2>Why the unflattering number is the point</h2>
+      <p>
+        A single in-distribution win is not evidence about a model. It is evidence about an
+        overlap between a training set and a test set. On its own, 0.7026 is unfalsifiable
+        marketing — the reader has no way to tell whether I found a good model or a favourable split,
+        and the honest default is to assume the latter.
+      </p>
+      <p>
+        Publishing 25.3 next to it changes what 0.7026 is worth. It tells you I ran the test that
+        could have destroyed the claim, and it draws the boundary of the claim precisely: this model
+        predicts UltraFeedback-style preferences, cheaply, locally, on a CPU, with no API key, and it
+        does not transfer. That is a narrow and useful thing to be. It is much more credible than a
+        broad claim with one supporting number.
+      </p>
+
+      <h2>The lesson that cost me the most: accuracy can sit still while the model changes</h2>
+      <p>
+        The sharpest version of this came from a sibling model in the same repo — the DeBERTa
+        hallucination judge. It encoded each example as <span class="code">Q: … C: … A: …</span> and
+        truncated from the right, which meant that on a 200-example RAGTruth sample the
+        <em>answer</em> — the only span being classified — was deleted entirely on 50.5% of examples
+        and partially on another 15.5%. The model was being asked an unanswerable question and
+        answering it anyway.
+      </p>
+      <p>
+        I fixed the encoding to budget the context and keep the question and answer whole, and
+        re-measured on the identical sample. The weights never changed.
+      </p>
+
+      <figure>
+        <div class="fig-title">Same weights, fixed encoding — what moved and what did not</div>
+        <svg viewBox="0 0 620 176" role="img" aria-label="Three metrics before and after an encoding fix. ROC-AUC moves from 0.444 to 0.603. F1 at the best-accuracy operating point moves from 0.092 to 0.615. Best achievable accuracy stays at 0.605 both before and after, below a majority-class baseline of 0.610.">
+          <g font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--ink-faint)">
+            <text x="150" y="12" text-anchor="middle">0.0</text>
+            <text x="330" y="12" text-anchor="middle">0.3</text>
+            <text x="510" y="12" text-anchor="middle">0.6</text>
+          </g>
+          <line x1="150" y1="18" x2="150" y2="126" stroke="var(--rule)" />
+
+          <g font-family="'IBM Plex Mono',monospace" font-size="11">
+            <text x="0" y="40" fill="var(--ink-faint)">ROC-AUC</text>
+            <line x1="416" y1="36" x2="512" y2="36" stroke="var(--accent)" stroke-width="2" />
+            <circle cx="416" cy="36" r="5" fill="var(--card)" stroke="var(--ink-faint)" stroke-width="2" />
+            <circle cx="512" cy="36" r="5" fill="var(--accent)" />
+            <text x="406" y="40" fill="var(--ink-faint)" text-anchor="end">0.444</text>
+            <text x="526" y="40" fill="var(--ink)">0.603</text>
+
+            <text x="0" y="76" fill="var(--ink-faint)">F1 @ best-acc.</text>
+            <line x1="205" y1="72" x2="519" y2="72" stroke="var(--accent)" stroke-width="2" />
+            <circle cx="205" cy="72" r="5" fill="var(--card)" stroke="var(--ink-faint)" stroke-width="2" />
+            <circle cx="519" cy="72" r="5" fill="var(--accent)" />
+            <text x="195" y="76" fill="var(--ink-faint)" text-anchor="end">0.092</text>
+            <text x="533" y="76" fill="var(--ink)">0.615</text>
+
+            <text x="0" y="112" fill="var(--ink-faint)">Best accuracy</text>
+            <circle cx="513" cy="108" r="5" fill="var(--card)" stroke="var(--ink-faint)" stroke-width="2" />
+            <circle cx="513" cy="108" r="2" fill="var(--ink-faint)" />
+            <text x="500" y="112" fill="var(--ink-faint)" text-anchor="end">0.605 &#8594; 0.605</text>
+          </g>
+
+          <line x1="516" y1="94" x2="516" y2="124" stroke="var(--ink-faint)" stroke-dasharray="3 3" />
+          <line x1="0" y1="140" x2="620" y2="140" stroke="var(--rule)" />
+          <g font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--ink-faint)">
+            <text x="0" y="158">hollow = legacy encoding &#183; filled = answer-preserving &#183; dashed = 0.610 majority-class baseline</text>
+            <text x="0" y="172">n = 200 RAGTruth examples, seed 42, CPU, identical weights on both runs</text>
+          </g>
+        </svg>
+        <figcaption>
+          Two metrics nearly doubled and one did not move at all. The flat one is the one most people
+          would have reported, and it would have concluded that the fix did nothing.
+        </figcaption>
+      </figure>
+
+      <p>
+        ROC-AUC went <strong>0.444 &#8594; 0.6035</strong>. F1 at the best-accuracy operating point went
+        <strong>0.09 &#8594; 0.61</strong>. Best achievable accuracy went <strong>0.605 &#8594;
+        0.605</strong> — unchanged, and still below the 0.610 you get by labelling everything
+        faithful.
+      </p>
+      <p>
+        Note the starting AUC: 0.444 is <em>below</em> 0.5. The model was ranking slightly worse than
+        a coin flip, which is a signature of a broken input rather than a weak model, and accuracy
+        never showed it. Accuracy collapses the whole score distribution to one side of one
+        threshold, so a model that is ordering examples backwards and a model that is ordering them
+        well can look identical if the majority class carries them both. AUC is threshold-free, so it
+        saw the ordering change immediately. <strong>The fix bought ranking quality, not accuracy</strong>
+        — and if I had been tracking accuracy alone, my conclusion would have been that a real bug fix
+        was worthless.
+      </p>
+
+      <h2>Limitations, stated plainly</h2>
+      <p>
+        In-distribution accuracy is 0.70, which is modest before any shift at all — this is a
+        base-size encoder trained for a single epoch. It inherits UltraFeedback's length and
+        elaboration bias, so longer answers are systematically favoured regardless of correctness. It
+        models no individual human: a 15-vote blind A/B probe by one rater put it at 0.400, which at
+        N=15 is statistically indistinguishable from chance and is reported as a probe, not a result.
+        There is a hard 512-token cap. And there is no absolute scale, so a single score cannot be
+        thresholded, averaged across a dataset, or compared across prompts.
+      </p>
+      <p>
+        If you need a general-purpose reward model, take one off the RewardBench 2 leaderboard. If you
+        want to argue that the in-distribution comparison is still unfair to the baseline in some way
+        I have not accounted for, the harness is one file and both eval scripts share the same
+        <span class="code">evaluate_pairs</span> function, so you can attack the exact step you think
+        is wrong.
+      </p>
+
+      <div class="endnote">
+        <div class="links">
+          <a href="https://github.com/Larmstrong1127/evalforge" target="_blank" rel="noopener">EvalForge source</a>
+          <a href="https://github.com/Larmstrong1127/evalforge/blob/master/training/MODEL_CARD_preference_reward.md" target="_blank" rel="noopener">Full model card</a>
+          <a href="https://github.com/Larmstrong1127/evalforge/blob/master/training/rewardbench2_results.json" target="_blank" rel="noopener">RewardBench 2 raw results</a>
+          <a href="mailto:la.armstrong19@gmail.com">Poke holes &#8594; email me</a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <footer>
+    <div class="wrap">© <span id="y"></span> Landon Armstrong · Issaquah, WA · <a href="../index.html" style="color:inherit">Home</a></div>
+  </footer>
+
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
