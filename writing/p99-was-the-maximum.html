@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="I published a 72-cell latency sweep with a clean finding. Then a reviewer asked how much the p99 would move on a re-run, and I found that nearest-rank p99 returns the maximum whenever n is under 101. My cells had 24 to 94 successes." />
+  <title>Every p99 in my benchmark was the slowest request &#8212; Landon Armstrong</title>
+  <link rel="canonical" href="https://larmstrong1127.github.io/writing/p99-was-the-maximum.html" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231d4ed8'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='17' fill='%23ffffff' text-anchor='middle'%3ELA%3C/text%3E%3C/svg%3E" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://larmstrong1127.github.io/writing/p99-was-the-maximum.html" />
+  <meta property="og:title" content="Every p99 in my benchmark was the slowest request" />
+  <meta property="og:description" content="72 cells, 24 to 94 successful requests each, and nearest-rank p99 returns the maximum below n = 101. The arithmetic was exact and the label was misleading." />
+  <meta property="og:image" content="https://larmstrong1127.github.io/assets/profile.jpg" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paper:      #faf8f4;
+      --ink:        #1c1b18;
+      --ink-soft:   #57534a;
+      --ink-faint:  #767162;
+      --rule:       #e2ddd3;
+      --accent:     #1d4ed8;
+      --card:       #ffffff;
+      --track:      #eceae4;
+      --mono:       'IBM Plex Mono', ui-monospace, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper:      #14140f;
+        --ink:        #f2efe7;
+        --ink-soft:   #c3bdaf;
+        --ink-faint:  #948d7d;
+        --rule:       #35322b;
+        --accent:     #93b4ff;
+        --card:       #1c1c16;
+        --track:      #2a2822;
+      }
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.65;
+      font-size: 16px;
+    }
+
+    a { color: inherit; }
+    img, svg { max-width: 100%; display: block; }
+
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+
+    h1, h2, h3, .serif {
+      font-family: 'Newsreader', Georgia, serif;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    header {
+      padding: 1.4rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .header-inner {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+    .site-name { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; text-decoration: none; }
+    nav.top a {
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+      margin-left: 1.4rem;
+    }
+    nav.top a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+    article { padding: 3.25rem 0 1rem; }
+    .kicker {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+    article h1 {
+      font-size: clamp(1.9rem, 4.6vw, 2.6rem);
+      line-height: 1.16;
+      max-width: 720px;
+      margin-bottom: 0.9rem;
+    }
+    .byline {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--ink-faint);
+      padding-bottom: 1.6rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 2rem;
+    }
+
+    article p { max-width: 680px; margin-bottom: 1.05rem; color: var(--ink-soft); }
+    article p strong { color: var(--ink); font-weight: 600; }
+    article h2 {
+      font-size: 1.42rem;
+      margin: 2.4rem 0 0.85rem;
+      color: var(--ink);
+    }
+    article ul { max-width: 680px; padding-left: 1.15rem; color: var(--ink-soft); margin-bottom: 1.05rem; }
+    article li + li { margin-top: 0.55rem; }
+    .code { font-family: var(--mono); font-size: 0.92em; }
+    article a[href] { color: var(--accent); text-decoration: none; }
+    article a[href]:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    pre {
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--ink-soft);
+      margin: 0 0 1.15rem;
+      max-width: 680px;
+    }
+
+    figure {
+      border: 1px solid var(--rule);
+      background: var(--card);
+      border-radius: 6px;
+      padding: 1.25rem 1.35rem 1.1rem;
+      margin: 1.6rem 0 1.5rem;
+      max-width: 680px;
+    }
+    figcaption {
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+      line-height: 1.55;
+      margin-top: 0.9rem;
+    }
+    .fig-title {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+      margin-bottom: 0.9rem;
+    }
+
+    .links {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      font-size: 0.88rem;
+    }
+    .links a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    .endnote {
+      border-top: 1px solid var(--rule);
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      padding-bottom: 2rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.5rem 0 2.5rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--ink-faint);
+    }
+
+    @media (max-width: 640px) {
+      nav.top a { margin-left: 0; margin-right: 1.2rem; }
+      article { padding-top: 2.25rem; }
+      pre { font-size: 0.72rem; }
+      figure { padding: 1rem 1rem 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="wrap header-inner">
+      <a class="site-name" href="../index.html">Landon Armstrong</a>
+      <nav class="top" aria-label="Primary">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#writing">Writing</a>
+        <a href="../index.html#experience">Experience</a>
+        <a href="../assets/Landon_Armstrong_Resume.pdf" target="_blank" rel="noopener">Resume</a>
+        <a href="../index.html#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <article>
+      <div class="kicker">Writing &#183; Measurement</div>
+      <h1>Every p99 in my benchmark was the slowest request</h1>
+      <div class="byline">August 2026 &#183; Landon Armstrong &#183; ~1,300 words</div>
+
+      <p>
+        I have been building an inference server for my
+        <a href="https://huggingface.co/DantheMan124/deberta-preference-reward" target="_blank" rel="noopener">published
+        reward model</a> &#8212; a 184M-parameter preference scorer, served on CPU, with a continuous
+        batcher in front of it. The obvious question about a batcher is how big to let the batches
+        get, so I built a 72-cell load study to answer it:
+        <span class="code">MAX_BATCH_SIZE</span> in {1, 2, 4, 8, 16, 32},
+        <span class="code">MAX_WAIT_MS</span> in {0, 5, 20, 50}, offered load in {1, 2, 4} requests
+        per second. Open-loop Poisson arrivals, a fresh server process per cell, five seconds of
+        warm-up excluded and twenty seconds measured.
+      </p>
+      <p>
+        It sat behind a gate first. My own charter rule says a latency sweep runs only on a quiet
+        box, and the first attempt was refused &#8212; mean CPU 19.12% against a 15% ceiling. Two
+        days later the box was idle at a mean CPU of <strong>7.93%</strong>, and all 72 cells ran. The finding was clean, and I liked it:
+        <strong>on this CPU, batching never pays.</strong> Batch size 1 had the lowest p99 in all
+        twelve load&#215;wait groups. At 4 rps offered, batch 1 sustained 4.65 rps and shed nothing,
+        while batch 32 sustained 2.12 rps and shed 43.6% of requests, with p99 going from 1,899 ms
+        to 12,777 ms. The mechanism was in the data too: mean forward time was 207 ms at a mean
+        batch of 1.0 and 7,431 ms at a mean batch of 18.2 &#8212; worse than linear, because eight
+        cores already parallelise a single forward pass and a bigger batch adds arithmetic without
+        adding hardware.
+      </p>
+      <p>
+        Every number lived in a committed <span class="code">summary.json</span>. I thought that was
+        the discipline.
+      </p>
+
+      <h2>One question</h2>
+      <p>
+        A reviewer read the table and asked one thing: <em>how much would that p99 move if you ran
+        the cell again?</em>
+      </p>
+      <p>
+        The honest answer was that I could not know. One run per cell, no repeats, and &#8212; the part I
+        had to go and check &#8212; no per-request records committed anywhere, so the number could
+        not be recomputed from what I had published. Order statistics do not back-fill.
+      </p>
+      <p>
+        Then it got worse. My percentile function is exact nearest-rank:
+      </p>
+      <pre>p(q) = sorted[ceil(q/100 * n) - 1]</pre>
+      <p>
+        For q = 99, <span class="code">ceil(0.99 * n)</span> equals <span class="code">n</span> for
+        every <span class="code">n</span> below 101. That is not an edge case, it is most of the
+        range. My cells measured between <strong>24 and 94</strong> successful requests. So in
+        <strong>all 72 cells</strong>, the number I had labelled &#8220;p99&#8221; was literally the
+        single slowest request of that run. It is checkable in the file I had already committed:
+        <span class="code">latency_p99_ms == latency_max_ms</span>, 72 out of 72.
+      </p>
+      <p>
+        The arithmetic was exact. The label was misleading. A reader sees &#8220;p99&#8221; and infers a tail
+        estimate that a good deal of the distribution supports. What they were handed was one
+        observation, selected for being the worst one &#8212; the least stable statistic the grid
+        could have reported.
+      </p>
+
+      <figure>
+        <div class="fig-title">Where the 99th-percentile rank lands, by sample size</div>
+        <svg viewBox="0 0 620 214" role="img" aria-label="Two sorted latency strips. With 50 observations the 99th-percentile rank is 50 of 50, so the marked point is the rightmost, slowest point. With 360 pooled observations the rank is 357 of 360 and three observations sit to the right of the marked point, so it is no longer the maximum.">
+          <g font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--ink-faint)">
+            <text x="0" y="24">n = 50</text>
+            <text x="150" y="24">fastest</text>
+            <text x="585" y="24" text-anchor="end">slowest</text>
+          </g>
+          <line x1="150" y1="32" x2="585" y2="32" stroke="var(--rule)" />
+          <g>
+            <circle cx="150.0" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="158.9" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="167.8" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="176.6" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="185.5" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="194.4" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="203.3" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="212.1" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="221.0" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="229.9" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="238.8" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="247.7" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="256.5" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="265.4" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="274.3" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="283.2" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="292.0" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="300.9" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="309.8" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="318.7" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="327.6" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="336.4" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="345.3" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="354.2" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="363.1" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="371.9" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="380.8" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="389.7" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="398.6" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="407.4" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="416.3" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="425.2" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="434.1" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="443.0" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="451.8" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="460.7" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="469.6" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="478.5" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="487.3" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="496.2" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="505.1" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="514.0" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="522.9" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="531.7" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="540.6" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="549.5" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="558.4" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="567.2" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="576.1" cy="46" r="3" fill="var(--ink-faint)" />
+            <circle cx="585.0" cy="46" r="5.5" fill="var(--accent)" />
+          </g>
+          <text x="0" y="50" font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--accent)">p99</text>
+          <text x="585" y="72" text-anchor="end" font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--accent)">ceil(0.99 &#215; 50) = 50 &#8212; rank 50 of 50, the maximum</text>
+
+          <line x1="0" y1="88" x2="620" y2="88" stroke="var(--rule)" />
+
+          <g font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--ink-faint)">
+            <text x="0" y="110">n = 360</text>
+            <text x="150" y="110">fastest</text>
+            <text x="585" y="110" text-anchor="end">slowest</text>
+          </g>
+          <g>
+            <line x1="150.00" y1="118" x2="150.00" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="151.21" y1="118" x2="151.21" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="152.42" y1="118" x2="152.42" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="153.64" y1="118" x2="153.64" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="154.85" y1="118" x2="154.85" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="156.06" y1="118" x2="156.06" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="157.27" y1="118" x2="157.27" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="158.48" y1="118" x2="158.48" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="159.69" y1="118" x2="159.69" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="160.91" y1="118" x2="160.91" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="162.12" y1="118" x2="162.12" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="163.33" y1="118" x2="163.33" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="164.54" y1="118" x2="164.54" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="165.75" y1="118" x2="165.75" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="166.96" y1="118" x2="166.96" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="168.18" y1="118" x2="168.18" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="169.39" y1="118" x2="169.39" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="170.60" y1="118" x2="170.60" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="171.81" y1="118" x2="171.81" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="173.02" y1="118" x2="173.02" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="174.23" y1="118" x2="174.23" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="175.45" y1="118" x2="175.45" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="176.66" y1="118" x2="176.66" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="177.87" y1="118" x2="177.87" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="179.08" y1="118" x2="179.08" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="180.29" y1="118" x2="180.29" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="181.50" y1="118" x2="181.50" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="182.72" y1="118" x2="182.72" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="183.93" y1="118" x2="183.93" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="185.14" y1="118" x2="185.14" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="186.35" y1="118" x2="186.35" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="187.56" y1="118" x2="187.56" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="188.77" y1="118" x2="188.77" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="189.99" y1="118" x2="189.99" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="191.20" y1="118" x2="191.20" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="192.41" y1="118" x2="192.41" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="193.62" y1="118" x2="193.62" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="194.83" y1="118" x2="194.83" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="196.04" y1="118" x2="196.04" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="197.26" y1="118" x2="197.26" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="198.47" y1="118" x2="198.47" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="199.68" y1="118" x2="199.68" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="200.89" y1="118" x2="200.89" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="202.10" y1="118" x2="202.10" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="203.31" y1="118" x2="203.31" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="204.53" y1="118" x2="204.53" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="205.74" y1="118" x2="205.74" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="206.95" y1="118" x2="206.95" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="208.16" y1="118" x2="208.16" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="209.37" y1="118" x2="209.37" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="210.58" y1="118" x2="210.58" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="211.80" y1="118" x2="211.80" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="213.01" y1="118" x2="213.01" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="214.22" y1="118" x2="214.22" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="215.43" y1="118" x2="215.43" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="216.64" y1="118" x2="216.64" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="217.86" y1="118" x2="217.86" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="219.07" y1="118" x2="219.07" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="220.28" y1="118" x2="220.28" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="221.49" y1="118" x2="221.49" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="222.70" y1="118" x2="222.70" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="223.91" y1="118" x2="223.91" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="225.13" y1="118" x2="225.13" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="226.34" y1="118" x2="226.34" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="227.55" y1="118" x2="227.55" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="228.76" y1="118" x2="228.76" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="229.97" y1="118" x2="229.97" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="231.18" y1="118" x2="231.18" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="232.40" y1="118" x2="232.40" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="233.61" y1="118" x2="233.61" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="234.82" y1="118" x2="234.82" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="236.03" y1="118" x2="236.03" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="237.24" y1="118" x2="237.24" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="238.45" y1="118" x2="238.45" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="239.67" y1="118" x2="239.67" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="240.88" y1="118" x2="240.88" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="242.09" y1="118" x2="242.09" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="243.30" y1="118" x2="243.30" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="244.51" y1="118" x2="244.51" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="245.72" y1="118" x2="245.72" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="246.94" y1="118" x2="246.94" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="248.15" y1="118" x2="248.15" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="249.36" y1="118" x2="249.36" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="250.57" y1="118" x2="250.57" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="251.78" y1="118" x2="251.78" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="252.99" y1="118" x2="252.99" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="254.21" y1="118" x2="254.21" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="255.42" y1="118" x2="255.42" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="256.63" y1="118" x2="256.63" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="257.84" y1="118" x2="257.84" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="259.05" y1="118" x2="259.05" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="260.26" y1="118" x2="260.26" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="261.48" y1="118" x2="261.48" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="262.69" y1="118" x2="262.69" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="263.90" y1="118" x2="263.90" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="265.11" y1="118" x2="265.11" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="266.32" y1="118" x2="266.32" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="267.53" y1="118" x2="267.53" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="268.75" y1="118" x2="268.75" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="269.96" y1="118" x2="269.96" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="271.17" y1="118" x2="271.17" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="272.38" y1="118" x2="272.38" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="273.59" y1="118" x2="273.59" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="274.81" y1="118" x2="274.81" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="276.02" y1="118" x2="276.02" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="277.23" y1="118" x2="277.23" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="278.44" y1="118" x2="278.44" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="279.65" y1="118" x2="279.65" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="280.86" y1="118" x2="280.86" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="282.08" y1="118" x2="282.08" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="283.29" y1="118" x2="283.29" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="284.50" y1="118" x2="284.50" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="285.71" y1="118" x2="285.71" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="286.92" y1="118" x2="286.92" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="288.13" y1="118" x2="288.13" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="289.35" y1="118" x2="289.35" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="290.56" y1="118" x2="290.56" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="291.77" y1="118" x2="291.77" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="292.98" y1="118" x2="292.98" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="294.19" y1="118" x2="294.19" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="295.40" y1="118" x2="295.40" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="296.62" y1="118" x2="296.62" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="297.83" y1="118" x2="297.83" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="299.04" y1="118" x2="299.04" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="300.25" y1="118" x2="300.25" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="301.46" y1="118" x2="301.46" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="302.67" y1="118" x2="302.67" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="303.89" y1="118" x2="303.89" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="305.10" y1="118" x2="305.10" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="306.31" y1="118" x2="306.31" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="307.52" y1="118" x2="307.52" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="308.73" y1="118" x2="308.73" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="309.94" y1="118" x2="309.94" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="311.16" y1="118" x2="311.16" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="312.37" y1="118" x2="312.37" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="313.58" y1="118" x2="313.58" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="314.79" y1="118" x2="314.79" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="316.00" y1="118" x2="316.00" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="317.21" y1="118" x2="317.21" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="318.43" y1="118" x2="318.43" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="319.64" y1="118" x2="319.64" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="320.85" y1="118" x2="320.85" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="322.06" y1="118" x2="322.06" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="323.27" y1="118" x2="323.27" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="324.48" y1="118" x2="324.48" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="325.70" y1="118" x2="325.70" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="326.91" y1="118" x2="326.91" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="328.12" y1="118" x2="328.12" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="329.33" y1="118" x2="329.33" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="330.54" y1="118" x2="330.54" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="331.75" y1="118" x2="331.75" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="332.97" y1="118" x2="332.97" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="334.18" y1="118" x2="334.18" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="335.39" y1="118" x2="335.39" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="336.60" y1="118" x2="336.60" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="337.81" y1="118" x2="337.81" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="339.03" y1="118" x2="339.03" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="340.24" y1="118" x2="340.24" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="341.45" y1="118" x2="341.45" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="342.66" y1="118" x2="342.66" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="343.87" y1="118" x2="343.87" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="345.08" y1="118" x2="345.08" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="346.30" y1="118" x2="346.30" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="347.51" y1="118" x2="347.51" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="348.72" y1="118" x2="348.72" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="349.93" y1="118" x2="349.93" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="351.14" y1="118" x2="351.14" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="352.35" y1="118" x2="352.35" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="353.57" y1="118" x2="353.57" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="354.78" y1="118" x2="354.78" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="355.99" y1="118" x2="355.99" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="357.20" y1="118" x2="357.20" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="358.41" y1="118" x2="358.41" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="359.62" y1="118" x2="359.62" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="360.84" y1="118" x2="360.84" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="362.05" y1="118" x2="362.05" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="363.26" y1="118" x2="363.26" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="364.47" y1="118" x2="364.47" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="365.68" y1="118" x2="365.68" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="366.89" y1="118" x2="366.89" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="368.11" y1="118" x2="368.11" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="369.32" y1="118" x2="369.32" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="370.53" y1="118" x2="370.53" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="371.74" y1="118" x2="371.74" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="372.95" y1="118" x2="372.95" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="374.16" y1="118" x2="374.16" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="375.38" y1="118" x2="375.38" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="376.59" y1="118" x2="376.59" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="377.80" y1="118" x2="377.80" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="379.01" y1="118" x2="379.01" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="380.22" y1="118" x2="380.22" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="381.43" y1="118" x2="381.43" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="382.65" y1="118" x2="382.65" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="383.86" y1="118" x2="383.86" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="385.07" y1="118" x2="385.07" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="386.28" y1="118" x2="386.28" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="387.49" y1="118" x2="387.49" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="388.70" y1="118" x2="388.70" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="389.92" y1="118" x2="389.92" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="391.13" y1="118" x2="391.13" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="392.34" y1="118" x2="392.34" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="393.55" y1="118" x2="393.55" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="394.76" y1="118" x2="394.76" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="395.97" y1="118" x2="395.97" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="397.19" y1="118" x2="397.19" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="398.40" y1="118" x2="398.40" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="399.61" y1="118" x2="399.61" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="400.82" y1="118" x2="400.82" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="402.03" y1="118" x2="402.03" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="403.25" y1="118" x2="403.25" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="404.46" y1="118" x2="404.46" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="405.67" y1="118" x2="405.67" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="406.88" y1="118" x2="406.88" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="408.09" y1="118" x2="408.09" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="409.30" y1="118" x2="409.30" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="410.52" y1="118" x2="410.52" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="411.73" y1="118" x2="411.73" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="412.94" y1="118" x2="412.94" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="414.15" y1="118" x2="414.15" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="415.36" y1="118" x2="415.36" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="416.57" y1="118" x2="416.57" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="417.79" y1="118" x2="417.79" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="419.00" y1="118" x2="419.00" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="420.21" y1="118" x2="420.21" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="421.42" y1="118" x2="421.42" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="422.63" y1="118" x2="422.63" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="423.84" y1="118" x2="423.84" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="425.06" y1="118" x2="425.06" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="426.27" y1="118" x2="426.27" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="427.48" y1="118" x2="427.48" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="428.69" y1="118" x2="428.69" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="429.90" y1="118" x2="429.90" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="431.11" y1="118" x2="431.11" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="432.33" y1="118" x2="432.33" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="433.54" y1="118" x2="433.54" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="434.75" y1="118" x2="434.75" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="435.96" y1="118" x2="435.96" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="437.17" y1="118" x2="437.17" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="438.38" y1="118" x2="438.38" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="439.60" y1="118" x2="439.60" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="440.81" y1="118" x2="440.81" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="442.02" y1="118" x2="442.02" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="443.23" y1="118" x2="443.23" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="444.44" y1="118" x2="444.44" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="445.65" y1="118" x2="445.65" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="446.87" y1="118" x2="446.87" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="448.08" y1="118" x2="448.08" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="449.29" y1="118" x2="449.29" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="450.50" y1="118" x2="450.50" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="451.71" y1="118" x2="451.71" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="452.92" y1="118" x2="452.92" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="454.14" y1="118" x2="454.14" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="455.35" y1="118" x2="455.35" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="456.56" y1="118" x2="456.56" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="457.77" y1="118" x2="457.77" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="458.98" y1="118" x2="458.98" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="460.19" y1="118" x2="460.19" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="461.41" y1="118" x2="461.41" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="462.62" y1="118" x2="462.62" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="463.83" y1="118" x2="463.83" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="465.04" y1="118" x2="465.04" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="466.25" y1="118" x2="466.25" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="467.47" y1="118" x2="467.47" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="468.68" y1="118" x2="468.68" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="469.89" y1="118" x2="469.89" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="471.10" y1="118" x2="471.10" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="472.31" y1="118" x2="472.31" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="473.52" y1="118" x2="473.52" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="474.74" y1="118" x2="474.74" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="475.95" y1="118" x2="475.95" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="477.16" y1="118" x2="477.16" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="478.37" y1="118" x2="478.37" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="479.58" y1="118" x2="479.58" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="480.79" y1="118" x2="480.79" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="482.01" y1="118" x2="482.01" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="483.22" y1="118" x2="483.22" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="484.43" y1="118" x2="484.43" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="485.64" y1="118" x2="485.64" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="486.85" y1="118" x2="486.85" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="488.06" y1="118" x2="488.06" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="489.28" y1="118" x2="489.28" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="490.49" y1="118" x2="490.49" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="491.70" y1="118" x2="491.70" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="492.91" y1="118" x2="492.91" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="494.12" y1="118" x2="494.12" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="495.33" y1="118" x2="495.33" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="496.55" y1="118" x2="496.55" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="497.76" y1="118" x2="497.76" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="498.97" y1="118" x2="498.97" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="500.18" y1="118" x2="500.18" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="501.39" y1="118" x2="501.39" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="502.60" y1="118" x2="502.60" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="503.82" y1="118" x2="503.82" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="505.03" y1="118" x2="505.03" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="506.24" y1="118" x2="506.24" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="507.45" y1="118" x2="507.45" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="508.66" y1="118" x2="508.66" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="509.87" y1="118" x2="509.87" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="511.09" y1="118" x2="511.09" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="512.30" y1="118" x2="512.30" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="513.51" y1="118" x2="513.51" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="514.72" y1="118" x2="514.72" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="515.93" y1="118" x2="515.93" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="517.14" y1="118" x2="517.14" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="518.36" y1="118" x2="518.36" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="519.57" y1="118" x2="519.57" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="520.78" y1="118" x2="520.78" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="521.99" y1="118" x2="521.99" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="523.20" y1="118" x2="523.20" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="524.42" y1="118" x2="524.42" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="525.63" y1="118" x2="525.63" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="526.84" y1="118" x2="526.84" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="528.05" y1="118" x2="528.05" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="529.26" y1="118" x2="529.26" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="530.47" y1="118" x2="530.47" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="531.69" y1="118" x2="531.69" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="532.90" y1="118" x2="532.90" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="534.11" y1="118" x2="534.11" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="535.32" y1="118" x2="535.32" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="536.53" y1="118" x2="536.53" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="537.74" y1="118" x2="537.74" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="538.96" y1="118" x2="538.96" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="540.17" y1="118" x2="540.17" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="541.38" y1="118" x2="541.38" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="542.59" y1="118" x2="542.59" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="543.80" y1="118" x2="543.80" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="545.01" y1="118" x2="545.01" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="546.23" y1="118" x2="546.23" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="547.44" y1="118" x2="547.44" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="548.65" y1="118" x2="548.65" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="549.86" y1="118" x2="549.86" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="551.07" y1="118" x2="551.07" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="552.28" y1="118" x2="552.28" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="553.50" y1="118" x2="553.50" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="554.71" y1="118" x2="554.71" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="555.92" y1="118" x2="555.92" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="557.13" y1="118" x2="557.13" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="558.34" y1="118" x2="558.34" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="559.55" y1="118" x2="559.55" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="560.77" y1="118" x2="560.77" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="561.98" y1="118" x2="561.98" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="563.19" y1="118" x2="563.19" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="564.40" y1="118" x2="564.40" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="565.61" y1="118" x2="565.61" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="566.82" y1="118" x2="566.82" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="568.04" y1="118" x2="568.04" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="569.25" y1="118" x2="569.25" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="570.46" y1="118" x2="570.46" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="571.67" y1="118" x2="571.67" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="572.88" y1="118" x2="572.88" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="574.09" y1="118" x2="574.09" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="575.31" y1="118" x2="575.31" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="576.52" y1="118" x2="576.52" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="577.73" y1="118" x2="577.73" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="578.94" y1="118" x2="578.94" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="580.15" y1="118" x2="580.15" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="582.58" y1="118" x2="582.58" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="583.79" y1="118" x2="583.79" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="585.00" y1="118" x2="585.00" y2="130" stroke="var(--ink-faint)" stroke-width="0.7" />
+            <line x1="581.36" y1="113" x2="581.36" y2="135" stroke="var(--accent)" stroke-width="2.4" />
+          </g>
+          <text x="0" y="128" font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--accent)">p99</text>
+          <text x="585" y="158" text-anchor="end" font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--accent)">ceil(0.99 &#215; 360) = 357 &#8212; three observations sit past it</text>
+
+          <line x1="0" y1="174" x2="620" y2="174" stroke="var(--rule)" />
+          <g font-family="'IBM Plex Mono',monospace" font-size="10" fill="var(--ink-faint)">
+            <text x="0" y="194">published run: 24&#8211;94 successes per cell &#8212; every cell fell in the top strip</text>
+            <text x="0" y="208">360 is what 3 repeats &#215; 120 measured seconds at 1 rps is designed to pool</text>
+          </g>
+        </svg>
+        <figcaption>
+          Nearest-rank percentiles are order statistics, so the only question is which rank the
+          formula selects. Below n = 101 it selects the last one. The spacing of the points here is
+          illustrative &#8212; the claim is about the rank, not about latency values.
+        </figcaption>
+      </figure>
+
+      <h2>The discipline existed. It just did not propagate.</h2>
+      <p>
+        The uncomfortable part is that I already knew this. In the same repository, a quantization
+        study I had written earlier carries a <em>Threats to validity</em> section saying, in plain
+        words, that it is one split, one seed and one run, that no confidence interval is offered
+        because none was measured, and that two variants differing by a few pairs out of 1,987
+        cannot be told apart by that study. That is the same caveat. It is the correct caveat. I wrote it, in that repo, before the sweep existed.
+      </p>
+      <p>
+        It did not travel. When I built the sweep I was thinking about arrival processes, flush
+        policy, warm-up exclusion and the quiet-box gate &#8212; the parts that were hard. The
+        statistics were a solved problem, borrowed from a helper I had already written and
+        unit-tested, and tested code invites you to stop looking at it. <strong>Fixes propagate along
+        the path the author is looking at</strong>, and I was looking at the load generator, not at
+        the summariser. Having good practice somewhere in a repository is not the same as having it
+        everywhere in it. A caveat that lives in one document is a habit; only a check that fails the
+        build is a control.
+      </p>
+
+      <h2>What fixing it took</h2>
+      <p>
+        The root cause of the &#8220;cannot be recomputed&#8221; half was smaller than the essay it
+        deserves. It was one line in <span class="code">.gitignore</span>:
+      </p>
+      <pre>-results/**/raw/</pre>
+      <p>
+        The harness could always see every request. It threw the rows away and kept the summary
+        &#8212; pre-computed order statistics with nothing committed to check them against. Deleting
+        that line is what made the rest possible. On top of it:
+      </p>
+      <ul>
+        <li><strong>Per-request persistence.</strong> One JSONL row per request, with unrounded
+          timestamps, achieved batch size, queue wait, forward time, and the cell configuration.
+          Warm-up rows stay in the file, flagged, so their exclusion is verifiable rather than
+          asserted.</li>
+        <li><strong>Repeats.</strong> Each cell runs three times by default, each with a fresh server
+          process and its own derived seed, so the arrival process is a new draw rather than a
+          replay. Wall-clock quantities like throughput are averaged per repeat and never
+          pooled &#8212; pooling them would divide a correct success count by a span that includes
+          the restart gap.</li>
+        <li><strong>A seeded bootstrap interval.</strong> Two thousand resamples with replacement
+          over the pooled latencies, the same nearest-rank rule inside the resample as outside it,
+          reported as the 2.5th and 97.5th percentiles. The seed is derived from the cell id and the
+          repeat seeds, both of which sit on every raw row, so a reader holding only
+          <span class="code">raw/</span> computes the identical interval rather than a similar
+          one.</li>
+        <li><strong>A recompute gate.</strong> One script reads the raw rows and nothing else &#8212;
+          not the summary, not the server logs &#8212; rebuilds every statistic, and only then opens
+          the summary to compare. A non-zero exit means nothing from that run gets published. One
+          test runs it against a committed fixture; a second doctors a p99 in the summary and asserts
+          the check fails.</li>
+        <li><strong>The caveat moved above the table.</strong> It used to be reachable further down
+          the page. Now the reader meets it in the same eyeful as the number, because a limitation
+          found after the number has already been believed is not a limitation, it is an alibi.</li>
+      </ul>
+      <p>
+        The re-run itself is specified and not finished: 120 measured seconds per repeat, which at
+        the lowest offered load clears n = 101 and pools to roughly 360 across three repeats.
+        Seventy-two cells times three repeats is about 8.6 hours, so it is an overnight job. The method
+        has shipped. The numbers it produces are pending, and I am not
+        going to describe them before they exist.
+      </p>
+
+      <h2>The finding survived, and that is not the point</h2>
+      <p>
+        I want to be precise about the outcome, because it would be easy to tell this as a story
+        where the audit vindicated me. Batch size 1 still has the lowest p99 in all twelve
+        load&#215;wait groups, and an ordering that holds across twelve independent comparisons is
+        robust even when each individual p99 rests on a single observation. Throughput and shed rate
+        are untouched by any of this &#8212; they are counts, not order statistics &#8212; and 0%
+        shed against 43.6% shed is not a tail-estimation problem. The knee is where I said it was.
+      </p>
+      <p>
+        But &#8220;the finding survived&#8221; is a conclusion you are entitled to <em>after</em> the
+        audit, never a reason to skip it. I did not know the ordering was robust until I went and
+        separated the parts of the result that depended on the broken statistic from the parts that
+        did not. Before that, I had a table where one column meant something other than what its header said, and
+        the fact that it carried the least weight was luck, not method. A reviewer's single question cost me a day and bought a number I can
+        now defend. That is a good trade every time it is offered.
+      </p>
+
+      <div class="endnote">
+        <div class="links">
+          <a href="https://huggingface.co/DantheMan124/deberta-preference-reward" target="_blank" rel="noopener">The model being served</a>
+          <a href="reward-model-floor.html">How that model was measured</a>
+          <a href="mailto:la.armstrong19@gmail.com">Poke holes &#8594; email me</a>
+        </div>
+        <p style="margin-top:1.1rem;font-size:0.82rem;color:var(--ink-faint);max-width:680px;">
+          The server, the load generator and the run artifacts quoted here live in a private
+          repository I am preparing for release. The model itself is public at the link above.
+        </p>
+      </div>
+    </article>
+  </div>
+
+  <footer>
+    <div class="wrap">&#169; <span id="y"></span> Landon Armstrong &#183; Issaquah, WA &#183; <a href="../index.html" style="color:inherit">Home</a></div>
+  </footer>
+
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>

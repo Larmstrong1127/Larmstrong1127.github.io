@@ -601,6 +601,19 @@
       <div class="project">
         <div class="project-side">2026<br/>Measurement</div>
         <div>
+          <h3><a href="writing/p99-was-the-maximum.html">Every p99 in my benchmark was the slowest request</a></h3>
+          <p class="desc">
+            A 72-cell CPU batching sweep with a clean finding &#8212; and a reviewer's one question
+            that exposed it: nearest-rank p99 returns the maximum whenever n &lt; 101, and my cells
+            had 24&#8211;94 successes. The arithmetic was exact, the label was misleading, and the
+            same repo already carried the right caveat in a different document.
+          </p>
+          <div class="links"><a href="writing/p99-was-the-maximum.html">Read the write-up</a></div>
+        </div>
+      </div>
+      <div class="project">
+        <div class="project-side">2026<br/>Measurement</div>
+        <div>
           <h3><a href="writing/reward-model-floor.html">My reward model beats a model 2.4&#215; its size. It also scores at the random floor.</a></h3>
           <p class="desc">
             A 184M Bradley-Terry preference model at 0.7026 pairwise accuracy against a 435M public
