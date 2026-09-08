@@ -775,11 +775,22 @@
           found after the number has already been believed is not a limitation, it is an alibi.</li>
       </ul>
       <p>
-        The re-run itself is specified and not finished: 120 measured seconds per repeat, which at
-        the lowest offered load clears n = 101 and pools to roughly 360 across three repeats.
-        Seventy-two cells times three repeats is about 8.6 hours, so it is an overnight job. The method
-        has shipped. The numbers it produces are pending, and I am not
-        going to describe them before they exist.
+        The re-run landed after this was first published: 72 cells, three repeats each, 120 measured
+        seconds per repeat, 369 to 1,430 successful requests per cell. p99 is the maximum in zero of
+        seventy-two cells. Batch size 1 keeps the lowest p99 in all twelve groups and wins every repeat
+        of every group. And the harness found a fourth thing I had got wrong: the bootstrap interval I
+        added was a percentile bootstrap over the <em>pooled</em> per-request latencies, which treats
+        every request as an independent draw and so only sees within-window noise. A fresh server
+        process is a different draw. The per-repeat p99 spread exceeded that interval's width in 56 of
+        72 cells, median 1.4&#215;, worst 14&#215;, and the flag I had wired to fire when repeats disagree
+        beyond the interval fired on 58. So the interval bounds the pooled sample's p99; the per-repeat
+        minimum and maximum bound the cell's, and with three repeats that is honestly wide. I kept the
+        numbers and narrowed what I claim about them. The run was also killed by the machine at cell 27
+        and resumed, and the artifact says so.</p>
+      <p>
+        That is now three times in one repository that a measurement instrument claimed more than it
+        delivered, and the second time the check built to catch it is what caught it. An instrument is a
+        claim too. The only ones I trust now ship with a check that can fail.
       </p>
 
       <h2>The finding survived, and that is not the point</h2>
