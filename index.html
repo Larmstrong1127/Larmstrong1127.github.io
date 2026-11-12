@@ -431,6 +431,29 @@
       <h2 class="section-head">Selected projects</h2>
 
       <div class="project">
+        <div class="project-side">2026<br/>Open source</div>
+        <div>
+          <h3><a href="https://github.com/omnigent-ai/omnigent/pulls?q=author%3ALarmstrong1127" target="_blank" rel="noopener">Omnigent contributions</a></h3>
+          <div class="role">Contributor to an open-source AI agent platform</div>
+          <p class="desc">
+            Pull requests to omnigent-ai/omnigent, each starting from a real defect. The live
+            <code>/openapi.json</code> referenced a <code>ServerStreamEvent</code> schema it never
+            defined; it now does, through one shared schema builder, with tests that every reference
+            resolves (#8886, through maintainer review). A stderr buffer meant to cap the host's
+            memory kept "the last 80 lines", but one line can be any length; it is now bounded by
+            characters, with tests that fail on the old code (#13693). Others type and document API
+            responses and add a <code>--policies</code> CLI flag.
+          </p>
+          <div class="links">
+            <a href="https://github.com/omnigent-ai/omnigent/pull/8886" target="_blank" rel="noopener">#8886</a>
+            <a href="https://github.com/omnigent-ai/omnigent/pull/13693" target="_blank" rel="noopener">#13693</a>
+            <a href="https://github.com/omnigent-ai/omnigent/pulls?q=author%3ALarmstrong1127" target="_blank" rel="noopener">All my PRs</a>
+          </div>
+          <div class="stack-line">Python · FastAPI · OpenAPI · pytest</div>
+        </div>
+      </div>
+
+      <div class="project">
         <div class="project-side">2026<br/>ML serving</div>
         <div>
           <h3><a href="writing/p99-was-the-maximum.html">reward-serve</a></h3>
@@ -533,7 +556,7 @@
       <div class="project">
         <div class="project-side">2026<br/>Full-stack SaaS</div>
         <div>
-          <h3><a href="https://denta-vision.vercel.app" target="_blank" rel="noopener">DentaVision</a></h3>
+          <h3><a href="https://github.com/Larmstrong1127/DentaVision" target="_blank" rel="noopener">DentaVision</a></h3>
           <div class="role">Solo developer</div>
           <p class="desc">
             A patient-facing layer for dental treatment plans, built out of my day job coordinating
@@ -548,8 +571,8 @@
           </p>
           <img class="thumb" src="assets/dentavision-dash.png" alt="DentaVision clinic dashboard showing patient counts, plan coverage, and treatment-acceptance metrics" width="1280" height="800" loading="lazy" decoding="async" />
           <div class="links">
-            <a href="https://denta-vision.vercel.app" target="_blank" rel="noopener">Live demo (sign-in currently offline)</a>
-            <a href="https://github.com/Larmstrong1127/DentaVision" target="_blank" rel="noopener">Source</a>
+            <a href="https://github.com/Larmstrong1127/DentaVision" target="_blank" rel="noopener">Source &amp; screenshots</a>
+            <span title="Treatment plans are PHI, so the demo runs only on synthetic data; its sign-in is offline for now.">Demo-only by design</span>
           </div>
           <div class="stack-line">React · Node.js · Express · MongoDB · Claude API · JWT · Jest</div>
         </div>
